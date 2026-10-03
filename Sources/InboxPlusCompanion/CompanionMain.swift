@@ -98,7 +98,11 @@ import InboxPlusUI
                 case .ready(let session):
                     let id = UUID().uuidString
                     response.flows = try await session.loginFlows(); sessions[id] = session; sessionDates[id] = Date(); response.sessionID = id
-                case .installedPendingRuntimeRestart(let outcome): throw CompanionError.server(outcome.message)
+                case .installedPendingRuntimeRestart(let outcome):
+                    throw CompanionError.server(
+                        "\(outcome.platform.accessibilityLabel) is installed on your Mac. "
+                        + "Restart the Inbox+ runtime on your Mac, then choose this network again on your phone."
+                    )
                 }
             case "loginStart":
                 guard let id = request.sessionID, let session = sessions[id], let flowID = request.body else { throw CompanionError.invalidResponse }

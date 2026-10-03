@@ -59,7 +59,7 @@ Copy the generated pairing key into the phone's pairing field. It is not printed
 
 The listener binds **only to 127.0.0.1:8765** and requires a bearer key. Place it behind an HTTPS reverse proxy reachable from your phone (for example, a private VPN's HTTPS serving feature). Enter that HTTPS base URL in the app. Do not expose the raw HTTP port to the Internet. Normal certificate validation remains enabled; there is no trust-all certificate bypass. HTTP loopback is supported only for testing on this Mac's simulator.
 
-The companion needs the same Full Disk Access and Messages Automation permissions as the desktop for iMessage. A newly installed bridge may require restarting the running profile before its login becomes available, as in the desktop app.
+The companion needs the same Full Disk Access and Messages Automation permissions as the desktop for iMessage. A newly installed bridge requires restarting the Mac runtime before its login becomes available; reopening only the phone app does not restart that runtime.
 
 ## Fixture companion
 
