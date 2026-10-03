@@ -36,6 +36,7 @@ final class InboxPlusIOSUITests: XCTestCase {
         for _ in 0..<4 where !app.buttons["disconnect-device"].exists { app.swipeUp() }
         app.buttons["disconnect-device"].tap()
         XCTAssertTrue(app.textFields["pairing-address"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.images["inboxplus-logo"].waitForExistence(timeout: 5))
         record(app, name: "pairing")
         app.textFields["pairing-address"].tap(); app.textFields["pairing-address"].typeText("http://example.com")
         app.secureTextFields["pairing-key"].tap(); app.secureTextFields["pairing-key"].typeText(String(repeating: "x", count: 32))
