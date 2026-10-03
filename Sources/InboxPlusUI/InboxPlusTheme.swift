@@ -6,11 +6,16 @@ import AppKit
 #endif
 
 enum InboxPlusTheme {
-    static let ink = Color.primary
     #if os(iOS)
-    static let paper = Color(uiColor: .systemBackground)
+    static let ink = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .white : .black })
+    static let paper = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .black : .white })
     #else
-    static let paper = Color(nsColor: .windowBackgroundColor)
+    static let ink = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? .white : .black
+    })
+    static let paper = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? .black : .white
+    })
     #endif
 }
 #if os(iOS)

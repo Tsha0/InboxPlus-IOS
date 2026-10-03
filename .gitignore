@@ -12,3 +12,6 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 *.xcresult/
+
+# The optional companion manifest pins its SDK exactly; the mobile package has no dependencies.
+/Package.resolved
