@@ -72,15 +72,17 @@ public struct MatrixClientStore: Sendable {
 
     public init(
         profile: RuntimePaths,
+        mobileCompanion: Bool = false,
         keychain: MatrixKeychain = MatrixKeychain(),
         keychainAccount: String? = nil
     ) {
-        dataDirectory = profile.data.appendingPathComponent("matrix", isDirectory: true)
-        cacheDirectory = profile.data.appendingPathComponent("matrix-cache", isDirectory: true)
-        sessionFile = profile.state.appendingPathComponent(Self.sessionFileName, isDirectory: false)
+        let suffix = mobileCompanion ? "-mobile-companion" : ""
+        dataDirectory = profile.data.appendingPathComponent("matrix" + suffix, isDirectory: true)
+        cacheDirectory = profile.data.appendingPathComponent("matrix-cache" + suffix, isDirectory: true)
+        sessionFile = profile.state.appendingPathComponent(mobileCompanion ? "matrix-session-mobile-companion.json" : Self.sessionFileName, isDirectory: false)
         // Scoping the Keychain item to the profile keeps disposable test profiles from colliding
         // with a real one.
-        self.keychainAccount = keychainAccount ?? "store:\(profile.profile.lastPathComponent)"
+        self.keychainAccount = keychainAccount ?? "store:\(profile.profile.lastPathComponent)\(suffix)"
         self.keychain = keychain
     }
 

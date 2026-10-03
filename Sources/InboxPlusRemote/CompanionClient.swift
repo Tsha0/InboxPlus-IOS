@@ -23,7 +23,7 @@ public struct CompanionConfiguration: Codable, Equatable, Sendable {
               let host = url.host, !host.isEmpty, url.user == nil, url.password == nil,
               url.query == nil, url.fragment == nil,
               url.scheme == "https" || (url.scheme == "http" && ["localhost", "127.0.0.1", "::1"].contains(host)),
-              token.count >= 32 else { throw CompanionError.invalidAddress }
+              token.count >= 32, token.count <= 512, !token.contains(where: { $0.isWhitespace || $0.isNewline }) else { throw CompanionError.invalidAddress }
         self.address = url
         self.token = token
     }
@@ -45,6 +45,7 @@ public struct CompanionRequest: Codable, Sendable {
     public init(_ operation: String) { self.operation = operation }
 }
 public struct CompanionResponse: Codable, Sendable {
+    public var disconnectedAccountIDs: Set<String>?
     public var snapshot: MessagingSnapshot?
     public var receipt: SendReceipt?
     public var data: Data?
@@ -82,6 +83,8 @@ public struct CompanionClient: Sendable {
 public actor CompanionGateway: MessagingGateway {
     private let client: CompanionClient
     private var polling: Task<Void, Never>?
+    private var subscriptionID: UUID?
+    private var pausedAccounts: Set<String> = []
     private var continuation: AsyncStream<GatewayEvent>.Continuation?
     private var accountIDs: [String] = []
     private var previous: MessagingSnapshot?
@@ -95,41 +98,62 @@ public actor CompanionGateway: MessagingGateway {
     }
     public func events() -> AsyncStream<GatewayEvent> {
         polling?.cancel()
+        let id = UUID()
+        subscriptionID = id
         let (stream, continuation) = AsyncStream<GatewayEvent>.makeStream()
         self.continuation = continuation
-        continuation.onTermination = { [weak self] _ in Task { await self?.stop() } }
+        continuation.onTermination = { [weak self] _ in Task { await self?.stop(id: id) } }
         polling = Task { [weak self] in
             while !Task.isCancelled {
                 do { try await Task.sleep(for: .seconds(3)) } catch { break }
                 guard let self else { break }
-                await self.poll()
+                await self.poll(subscription: id)
             }
         }
         return stream
     }
-    private func stop() { polling?.cancel(); polling = nil; continuation = nil }
-    private func poll() async {
+    public func setPaused(_ paused: Bool, accountID: String) {
+        if paused { pausedAccounts.insert(accountID) } else { pausedAccounts.remove(accountID) }
+        continuation?.yield(.connectionChanged(accountID: accountID, isConnected: !paused))
+    }
+    private func stop(id: UUID) {
+        guard subscriptionID == id else { return }
+        polling?.cancel(); polling = nil; continuation = nil; subscriptionID = nil
+    }
+    private func poll(subscription: UUID? = nil) async {
         do {
-            guard let snapshot = try await client.call(CompanionRequest("snapshot")).snapshot else { throw CompanionError.invalidResponse }
-            for account in snapshot.accounts { continuation?.yield(.connectionChanged(accountID: account.id, isConnected: true)) }
-            for identity in snapshot.identities where previous?.identities.contains(identity) != true { continuation?.yield(.identityUpserted(identity)) }
-            for conversation in snapshot.conversations where previous?.conversations.contains(conversation) != true { continuation?.yield(.conversationUpserted(conversation)) }
-            for (route, messages) in snapshot.messagesByRoute {
+            let response = try await client.call(CompanionRequest("snapshot"))
+            if let subscription, subscription != subscriptionID { return }
+            guard let snapshot = response.snapshot else { throw CompanionError.invalidResponse }
+            for account in snapshot.accounts { continuation?.yield(.connectionChanged(accountID: account.id, isConnected: !pausedAccounts.contains(account.id) && !(response.disconnectedAccountIDs ?? []).contains(account.id))) }
+            for identity in snapshot.identities where !pausedAccounts.contains(identity.accountID) && previous?.identities.contains(identity) != true { continuation?.yield(.identityUpserted(identity)) }
+            for conversation in snapshot.conversations where !pausedAccounts.contains(conversation.accountID) && previous?.conversations.contains(conversation) != true { continuation?.yield(.conversationUpserted(conversation)) }
+            for (route, messages) in snapshot.messagesByRoute where !pausedAccounts.contains(route.accountID) {
                 for message in messages where previous?.messagesByRoute[route]?.contains(message) != true { continuation?.yield(.messageUpserted(message)) }
             }
-            previous = snapshot
+            var delivered = snapshot
+            for id in pausedAccounts {
+                delivered.identities.removeAll { $0.accountID == id }
+                delivered.identities.append(contentsOf: previous?.identities.filter { $0.accountID == id } ?? [])
+                delivered.conversations.removeAll { $0.accountID == id }
+                delivered.conversations.append(contentsOf: previous?.conversations.filter { $0.accountID == id } ?? [])
+                for route in delivered.messagesByRoute.keys where route.accountID == id { delivered.messagesByRoute[route] = previous?.messagesByRoute[route] }
+            }
+            previous = delivered
             accountIDs = snapshot.accounts.map(\.id)
         } catch {
             for id in accountIDs { continuation?.yield(.connectionChanged(accountID: id, isConnected: false)) }
         }
     }
     public func sendText(_ body: String, to route: ConversationRoute) async throws -> SendReceipt {
+        guard !pausedAccounts.contains(route.accountID) else { throw CompanionError.server("Resume this account in Settings before sending.") }
         var request = CompanionRequest("sendText"); request.body = body; request.route = route
         guard let receipt = try await client.call(request).receipt else { throw CompanionError.invalidResponse }
         await poll()
         return receipt
     }
     public func send(_ attachment: OutgoingAttachment, to route: ConversationRoute) async throws -> SendReceipt {
+        guard !pausedAccounts.contains(route.accountID) else { throw CompanionError.server("Resume this account in Settings before sending.") }
         guard attachment.byteCount <= 25 * 1024 * 1024 else { throw CompanionError.server("Choose a file smaller than 25 MB.") }
         var request = CompanionRequest("sendAttachment")
         request.route = route; request.filename = attachment.filename

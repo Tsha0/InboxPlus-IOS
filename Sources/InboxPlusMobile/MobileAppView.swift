@@ -12,6 +12,7 @@ import InboxPlusBridge
 final class MobileSession {
     var model: InboxPlusAppModel?
     var client: CompanionClient?
+    var gateway: CompanionGateway?
     var isDemo = false
     var error: String?
     var isConnecting = false
@@ -29,15 +30,16 @@ final class MobileSession {
             let cacheURL = URL.cachesDirectory.appendingPathComponent("InboxPlusMedia")
             let loader = MediaLoader(cache: try MediaCache(directory: cacheURL), fetcher: CompanionMediaFetcher(client: client), freeSpace: VolumeFreeSpaceReporter(url: cacheURL))
             let directory = (try? Data(contentsOf: directoryURL)).flatMap { try? JSONDecoder().decode(SavedDirectory.self, from: $0).directory } ?? ContactDirectory()
-            let next = InboxPlusAppModel(gateway: CompanionGateway(client: client), directory: directory, media: MediaController(loader: loader))
+            let gateway = CompanionGateway(client: client)
+            let next = InboxPlusAppModel(gateway: gateway, directory: directory, media: MediaController(loader: loader))
             try await next.start()
             if save { try PairingKeychain.save(config) }
             model?.stop()
-            self.client = client; model = next; isDemo = false; error = nil
+            self.client = client; self.gateway = gateway; model = next; isDemo = false; error = nil
         } catch { self.error = error.localizedDescription }
     }
     func demo() {
-        model?.stop(); client = nil; isDemo = true; error = nil
+        model?.stop(); client = nil; gateway = nil; isDemo = true; error = nil
         model = InboxPlusAppModel(gateway: InMemoryMessagingGateway(seed: Fixtures.demoSnapshot), directory: Fixtures.directory)
         Task { try? await model?.start() }
     }
@@ -48,8 +50,12 @@ final class MobileSession {
             try JSONEncoder().encode(SavedDirectory(model.contactDirectory)).write(to: directoryURL, options: [.atomic, .completeFileProtection])
         } catch { self.error = "Could not save contacts: \(error.localizedDescription)" }
     }
+    func pauseAccount(_ account: ConnectedAccount, paused: Bool) {
+        if paused { model?.disconnect(accountID: account.id) } else { model?.reconnect(accountID: account.id) }
+        Task { await gateway?.setPaused(paused, accountID: account.id) }
+    }
     func unpair() {
-        model?.stop(); model = nil; client = nil; isDemo = false
+        model?.stop(); model = nil; client = nil; gateway = nil; isDemo = false
         PairingKeychain.delete()
         try? FileManager.default.removeItem(at: directoryURL)
         try? FileManager.default.removeItem(at: URL.cachesDirectory.appendingPathComponent("InboxPlusMedia"))
@@ -223,6 +229,9 @@ private struct MobileHome: View {
                         Spacer()
                         Image(systemName: model.isConnected(account.id) ? "checkmark.circle" : "exclamationmark.circle")
                     }.contextMenu {
+                        Button(model.isConnected(account.id) ? "Pause on this device" : "Resume on this device") {
+                            session.pauseAccount(account, paused: model.isConnected(account.id))
+                        }
                         Button("Remove from this device", role: .destructive) { pendingRemoval = account }
                     }
                 }

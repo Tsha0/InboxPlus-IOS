@@ -58,8 +58,8 @@ enum GatewaySelection {
             let gateway = DeferredRuntimeGateway(
                 paths: paths,
                 profileName: profileName,
-                build: { state in try makeMatrixGateway(paths: paths, state: state) },
-                onReady: { state in await attachMedia(media, paths: paths, state: state) }
+                build: { state in try makeMatrixGateway(paths: paths, state: state, media: media) },
+                onReady: { _ in }
             )
 
             return Services(
@@ -86,7 +86,8 @@ extension GatewaySelection {
     /// Builds the real gateway, once the homeserver behind it is answering.
     static func makeMatrixGateway(
         paths: RuntimePaths,
-        state: RuntimeProfileState
+        state: RuntimeProfileState,
+        media: MediaController
     ) throws -> any MessagingGateway {
         guard let port = state.snapshot.loopbackPort else {
             throw GatewaySelectionError.profileNotRunning(paths.profile.lastPathComponent)
@@ -94,13 +95,23 @@ extension GatewaySelection {
         let homeserver = URL(string: "http://127.0.0.1:\(port)")!
         let client = InboxPlusMatrixClient(
             homeserverURL: homeserver,
-            store: MatrixClientStore(profile: paths),
+            store: MatrixClientStore(profile: paths, mobileCompanion: true),
             provisioner: try MatrixAccountProvisioner(
                 baseURL: homeserver,
                 serverName: state.serverName,
                 registrationSecret: state.registrationSecret
             )
         )
+
+        // Share the exact authenticated client with media; a second SDK instance would
+        // neither have a connected session nor safely share the same store.
+        let cacheDirectory = paths.profile.appendingPathComponent("mobile-media")
+        let loader = MediaLoader(
+            cache: try MediaCache(directory: cacheDirectory),
+            fetcher: MatrixMediaFetcher(client: client),
+            freeSpace: VolumeFreeSpaceReporter(url: cacheDirectory)
+        )
+        Task { @MainActor in media.attach(loader: loader) }
 
         // Bridges invite this account into the portals they create, so the gateway needs to know
         // which local users are allowed to do that. Anything not in a prepared bridge's own
@@ -139,38 +150,6 @@ extension GatewaySelection {
         var sources: [any MessagingGateway] = [matrix]
         if let imessage = makeIMessageGateway() { sources.append(imessage) }
         return sources.count == 1 ? matrix : CompositeMessagingGateway(sources)
-    }
-
-    /// Gives the media controller something to download with, now that there is a homeserver.
-    static func attachMedia(
-        _ media: MediaController,
-        paths: RuntimePaths,
-        state: RuntimeProfileState
-    ) async {
-        guard let port = state.snapshot.loopbackPort else { return }
-        // Media lives beside the rest of the profile's private data and is bounded, so a long
-        // history cannot fill the disk on its own. Per profile, not per runtime root: two profiles
-        // are two separate installations and must not share cached message content.
-        let cacheDirectory = paths.profile.appendingPathComponent("media")
-        guard let cache = try? MediaCache(directory: cacheDirectory) else { return }
-
-        let homeserver = URL(string: "http://127.0.0.1:\(port)")!
-        guard let provisioner = try? MatrixAccountProvisioner(
-            baseURL: homeserver,
-            serverName: state.serverName,
-            registrationSecret: state.registrationSecret
-        ) else { return }
-        let client = InboxPlusMatrixClient(
-            homeserverURL: homeserver,
-            store: MatrixClientStore(profile: paths),
-            provisioner: provisioner
-        )
-        let loader = MediaLoader(
-            cache: cache,
-            fetcher: MatrixMediaFetcher(client: client),
-            freeSpace: VolumeFreeSpaceReporter(url: cacheDirectory)
-        )
-        await MainActor.run { media.attach(loader: loader) }
     }
 
     /// Decides which profile to attach to.

@@ -30,6 +30,8 @@ import InboxPlusUI
     let gateway: any MessagingGateway
     let media: MediaController
     var snapshot = MessagingSnapshot.empty
+    var disconnectedAccounts: Set<String> = []
+    var sessionDates: [String: Date] = [:]
     var eventTask: Task<Void, Never>?
     var sessions: [String: any BridgeLoginSession] = [:]
     init(gateway: any MessagingGateway, media: MediaController) { self.gateway = gateway; self.media = media }
@@ -50,14 +52,15 @@ import InboxPlusUI
             snapshot.conversations.removeAll { $0.route == conversation.route }; snapshot.conversations.append(conversation)
         case .identityUpserted(let identity):
             snapshot.identities.removeAll { $0.id == identity.id }; snapshot.identities.append(identity)
-        case .connectionChanged: break
+        case .connectionChanged(let id, let connected):
+            if connected { disconnectedAccounts.remove(id) } else { disconnectedAccounts.insert(id) }
         }
     }
     func handle(_ request: CompanionRequest) async -> CompanionResponse {
         var response = CompanionResponse()
         do {
             switch request.operation {
-            case "snapshot": response.snapshot = snapshot
+            case "snapshot": response.snapshot = snapshot; response.disconnectedAccountIDs = disconnectedAccounts
             case "sendText":
                 guard let route = request.route, snapshot.conversations.contains(where: { $0.route == route }), let body = request.body, !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw CompanionError.invalidResponse }
                 response.receipt = try await gateway.sendText(body, to: route)
@@ -89,11 +92,12 @@ import InboxPlusUI
                 }
                 throw CompanionError.server("Media download timed out. Try again.")
             case "loginPrepare":
+                for (id, created) in sessionDates where Date().timeIntervalSince(created) > 900 { sessions[id] = nil; sessionDates[id] = nil }
                 guard sessions.count < 8, let platform = request.platform, let provider = BridgeSelection.makeProvider() else { throw CompanionError.server("Account setup is unavailable. Check the Mac profile.") }
                 switch try await provider(platform) {
                 case .ready(let session):
                     let id = UUID().uuidString
-                    response.flows = try await session.loginFlows(); sessions[id] = session; response.sessionID = id
+                    response.flows = try await session.loginFlows(); sessions[id] = session; sessionDates[id] = Date(); response.sessionID = id
                 case .installedPendingRuntimeRestart(let outcome): throw CompanionError.server(outcome.message)
                 }
             case "loginStart":
@@ -103,11 +107,12 @@ import InboxPlusUI
                 guard let id = request.sessionID, let session = sessions[id], let loginID = request.loginID, let stepID = request.stepID, let type = request.stepType else { throw CompanionError.invalidResponse }
                 response.step = try await session.submit(loginID: loginID, stepID: stepID, type: type, values: request.values ?? [:])
                 if response.step?.type == .complete {
-                    sessions[id] = nil
+                    sessions[id] = nil; sessionDates[id] = nil
                     snapshot = try await gateway.loadSnapshot()
                 }
             case "loginCancel":
                 guard let id = request.sessionID, let session = sessions.removeValue(forKey: id), let loginID = request.loginID else { throw CompanionError.invalidResponse }
+                sessionDates[id] = nil
                 try await session.cancelLogin(loginID: loginID)
             default: throw CompanionError.server("This operation is not supported. Update the Mac companion.")
             }
