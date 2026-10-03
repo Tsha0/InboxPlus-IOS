@@ -55,7 +55,7 @@ public struct AccountPickerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.background)
-        .accessibilityIdentifier("account-picker")
+        .screenAccessibilityIdentifier("account-picker")
     }
 
     @ViewBuilder

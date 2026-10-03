@@ -30,6 +30,8 @@ The Mac must be reachable and running. Sync runs while the app is open; backgrou
 3. Select the **InboxPlusIOS** scheme and an iPhone or iPad simulator; Run.
 4. Choose **Explore demo inbox**, or connect to the Mac companion.
 
+You can also run `Scripts/run-ios.sh --demo` to build, install, and launch in the first available iPhone simulator. Set `INBOXPLUS_SIMULATOR_ID` to choose a specific simulator.
+
 For a physical device, select your own development team under Signing & Capabilities and choose the device. No signing identity or provisioning profile is stored here.
 
 ```bash
@@ -81,6 +83,10 @@ Pair the local simulator with `http://127.0.0.1:8765` and that key. This executa
 - Other desktop modules and `docs/`: inherited implementation and historical desktop notes, not iOS certification.
 
 The default package has no third-party dependencies. `INBOXPLUS_BUILD_COMPANION=1` selects the desktop targets and their pinned Matrix SDK. Shared models and UI stay in one source tree.
+
+## Source provenance
+
+The Mac source was imported from `Tsha0/InboxPlus` commit `2b819adc262490a70bf9ad786ffcc8a71f5b5eae`. The original Mac checkout was left unchanged.
 
 ## License
 

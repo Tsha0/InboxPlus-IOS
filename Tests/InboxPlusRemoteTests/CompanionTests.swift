@@ -50,6 +50,11 @@ import InboxPlusCompanionServer
     }
     #expect(snapshot?.accounts == Fixtures.snapshot.accounts)
     let remote = CompanionGateway(client: client)
+    await remote.setPaused(true, accountID: Fixtures.whatsAppRoute.accountID)
+    await #expect(throws: CompanionError.self) { try await remote.sendText("must not send", to: Fixtures.whatsAppRoute) }
+    let beforeResume = try await remote.loadSnapshot()
+    #expect(beforeResume.messagesByRoute[Fixtures.whatsAppRoute]?.contains { $0.body == "must not send" } == false)
+    await remote.setPaused(false, accountID: Fixtures.whatsAppRoute.accountID)
     let receipt = try await remote.sendText("iOS integration test", to: Fixtures.whatsAppRoute)
     #expect(receipt.route == Fixtures.whatsAppRoute)
     #expect(receipt.deliveryState == .acknowledged)
@@ -58,4 +63,29 @@ import InboxPlusCompanionServer
     #expect(updated.messagesByRoute[Fixtures.instagramRoute]?.contains { $0.body == "iOS integration test" } == false)
     let unauthorized = CompanionClient(configuration: try .init(address: "http://127.0.0.1:\(port)", token: String(repeating: "x", count: 32)))
     await #expect(throws: CompanionError.self) { try await unauthorized.call(.init("snapshot")) }
+}
+
+@Test func cancellingOldSubscriptionDoesNotCancelReplacement() async throws {
+    let client = CompanionClient(configuration: try .init(address: "http://127.0.0.1:18766", token: String(repeating: "a", count: 32)))
+    let gateway = CompanionGateway(client: client)
+    let first = await gateway.events()
+    let oldConsumer = Task { for await _ in first {} }
+    let second = await gateway.events()
+    oldConsumer.cancel()
+    await oldConsumer.value
+    try await Task.sleep(for: .milliseconds(30))
+    await gateway.setPaused(true, accountID: "account")
+    let received = await withTaskGroup(of: Bool.self) { group in
+        group.addTask {
+            for await event in second {
+                if case .connectionChanged(let id, let connected) = event { return id == "account" && !connected }
+            }
+            return false
+        }
+        group.addTask { try? await Task.sleep(for: .seconds(1)); return false }
+        let result = await group.next() ?? false
+        group.cancelAll()
+        return result
+    }
+    #expect(received)
 }

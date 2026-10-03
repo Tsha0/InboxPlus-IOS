@@ -45,7 +45,7 @@ public struct LoginStepView: View {
         // Escape and the close button dismiss the sheet without going through Cancel; the bridge
         // has to hear about those too.
         .onDisappear { controller.cancel() }
-        .accessibilityIdentifier("login-flow")
+        .screenAccessibilityIdentifier("login-flow")
     }
 
     private var header: some View {

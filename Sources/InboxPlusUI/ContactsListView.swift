@@ -63,7 +63,7 @@ struct ContactsListView: View {
         .padding(.top, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(.background)
-        .accessibilityIdentifier("inboxplus-contacts")
+        .screenAccessibilityIdentifier("inboxplus-contacts")
     }
 
     private func linkedDescription(_ summaries: [ConversationSummary]) -> String {

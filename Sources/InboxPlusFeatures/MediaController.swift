@@ -74,7 +74,7 @@ public final class MediaController {
                 let decision = await loader.storageDecision()
                 self?.storageWarning = decision.warning
                 self?.states[attachment.id] = .paused(
-                    decision.warning ?? "Downloads are paused because your Mac is low on disk space."
+                    decision.warning ?? "Downloads are paused because your device is low on disk space."
                 )
             } catch {
                 self?.states[attachment.id] = .failed(error.localizedDescription)

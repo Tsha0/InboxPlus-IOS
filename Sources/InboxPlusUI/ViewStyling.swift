@@ -27,3 +27,15 @@ extension View {
         )
     }
 }
+
+extension View {
+    /// iOS propagates a container's identifier to its controls. Keep identifiers on
+    /// the individual interactive elements so VoiceOver/UI automation can distinguish them.
+    @ViewBuilder func screenAccessibilityIdentifier(_ value: String) -> some View {
+        #if os(macOS)
+        self.accessibilityIdentifier(value)
+        #else
+        self
+        #endif
+    }
+}

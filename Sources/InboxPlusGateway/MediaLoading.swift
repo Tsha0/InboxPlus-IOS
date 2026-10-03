@@ -61,14 +61,14 @@ public struct MediaStoragePolicy: Sendable {
         if freeBytes < pauseBelowFreeBytes {
             return MediaStorageDecision(
                 allowsDownloads: false,
-                warning: "Your Mac is low on disk space, so Inbox+ has paused downloading media. "
+                warning: "Your device is low on disk space, so Inbox+ has paused downloading media. "
                     + "Your messages are safe and nothing has been deleted."
             )
         }
         if freeBytes < warnBelowFreeBytes {
             return MediaStorageDecision(
                 allowsDownloads: true,
-                warning: "Your Mac is running low on disk space."
+                warning: "Your device is running low on disk space."
             )
         }
         return MediaStorageDecision(allowsDownloads: true, warning: nil)

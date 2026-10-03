@@ -123,7 +123,7 @@ public struct ConversationView: View {
             model.markConversationRead(route)
             composerFocused = true
         }
-        .accessibilityIdentifier("conversation-\(route.accountID)-\(route.conversationID)")
+        .screenAccessibilityIdentifier("conversation-\(route.accountID)-\(route.conversationID)")
     }
 
     @ViewBuilder private var header: some View {

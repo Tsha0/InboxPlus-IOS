@@ -110,7 +110,7 @@ public struct InboxView: View {
         .padding(.top, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(.background)
-        .accessibilityIdentifier("inboxplus-inbox")
+        .screenAccessibilityIdentifier("inboxplus-inbox")
     }
 
     private var emptyTitle: String {
