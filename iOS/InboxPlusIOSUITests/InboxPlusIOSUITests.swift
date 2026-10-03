@@ -1,5 +1,6 @@
 import XCTest
 final class InboxPlusIOSUITests: XCTestCase {
+    override func setUp() { continueAfterFailure = false }
     @MainActor func testDemoNavigationSearchAndSend() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--demo"]
@@ -15,6 +16,7 @@ final class InboxPlusIOSUITests: XCTestCase {
         XCTAssertTrue(composer.waitForExistence(timeout: 5)); composer.tap(); composer.typeText("Hello from iOS")
         app.buttons["send-message"].tap()
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Hello from iOS")).firstMatch.waitForExistence(timeout: 5))
+        if app.buttons["dismiss-keyboard"].exists { app.buttons["dismiss-keyboard"].tap() }
         record(app, name: "conversation")
         app.tabBars.buttons["Contacts"].tap()
         XCTAssertTrue(app.staticTexts["Maya"].waitForExistence(timeout: 5))

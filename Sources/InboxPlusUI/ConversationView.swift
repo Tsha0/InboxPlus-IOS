@@ -95,6 +95,15 @@ public struct ConversationView: View {
             composer
         }
         .background(.background)
+        #if os(iOS)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { composerFocused = false }
+                    .accessibilityIdentifier("dismiss-keyboard")
+            }
+        }
+        #endif
         .sheet(isPresented: $showsLinkSheet) {
             LinkPersonSheet(
                 people: model.people,
@@ -175,6 +184,7 @@ public struct ConversationView: View {
                 }
             }
             .listStyle(.plain)
+            .scrollDismissesKeyboard(.interactively)
             .scrollContentBackground(.hidden)
             .onChange(of: messages.count) { scrollToLatest(proxy) }
             .onChange(of: route) { scrollToLatest(proxy, animated: false) }
