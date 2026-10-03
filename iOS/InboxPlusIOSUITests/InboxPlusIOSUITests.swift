@@ -18,9 +18,9 @@ final class InboxPlusIOSUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Hello from iOS")).firstMatch.waitForExistence(timeout: 5))
         if app.buttons["dismiss-keyboard"].exists { app.buttons["dismiss-keyboard"].tap() }
         record(app, name: "conversation")
-        app.buttons["Contacts"].tap()
+        app.buttons["Contacts"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Maya"].waitForExistence(timeout: 5))
-        app.buttons["Settings"].tap()
+        app.buttons["Settings"].firstMatch.tap()
         app.buttons["add-account"].tap()
         XCTAssertTrue(app.staticTexts["Add an account"].waitForExistence(timeout: 5))
         app.buttons["Cancel"].tap()
@@ -32,7 +32,7 @@ final class InboxPlusIOSUITests: XCTestCase {
     }
     @MainActor func testPairingValidation() throws {
         let app = XCUIApplication(); app.launchArguments = ["--demo"]; app.launch()
-        app.buttons["Settings"].tap()
+        app.buttons["Settings"].firstMatch.tap()
         for _ in 0..<4 where !app.buttons["disconnect-device"].exists { app.swipeUp() }
         app.buttons["disconnect-device"].tap()
         XCTAssertTrue(app.textFields["pairing-address"].waitForExistence(timeout: 5))
