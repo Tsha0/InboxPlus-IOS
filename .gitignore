@@ -1,0 +1,14 @@
+.superpowers/
+.worktrees/
+.build/
+.DS_Store
+docs/superpowers/
+
+# Local app bundle produced by Scripts/build-app.sh
+build/
+
+.build-companion/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcresult/

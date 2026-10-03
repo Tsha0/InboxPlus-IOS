@@ -1,0 +1,302 @@
+{
+  "bomFormat" : "CycloneDX",
+  "components" : [
+    {
+      "description" : "Portable Apple Silicon interpreter shipped inside the app; upstream distribution 20260929.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/astral-sh\/python-build-standalone"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/astral-sh\/python-build-standalone\/releases\/download\/20260929\/cpython-3.12.14%2B20260929-aarch64-apple-darwin-install_only_stripped.tar.gz"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "1bb3e53d231ee2c8881e8daf6426f4dd95bff0dda496af0f3af300357aa998d0"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "PSF-2.0"
+          }
+        }
+      ],
+      "name" : "cpython",
+      "purl" : "pkg:generic\/cpython@3.12.14",
+      "type" : "application",
+      "version" : "3.12.14"
+    },
+    {
+      "description" : "Built from a checksum-verified tarball with a pinned one-line patch; upstream is archived and does not compile with a current clang.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/gitlab.matrix.org\/matrix-org\/olm"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/gitlab.matrix.org\/matrix-org\/olm\/-\/archive\/3.2.16\/olm-3.2.16.tar.gz"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "1e90f9891009965fd064be747616da46b232086fe270b77605ec9bda34272a68"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "name" : "libolm",
+      "type" : "library",
+      "version" : "3.2.16"
+    },
+    {
+      "description" : "Checksum-verified binary xcframework, pinned exactly so protocol drift cannot arrive through a version range.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/matrix-org\/matrix-rust-components-swift"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "Apache-2.0"
+          }
+        }
+      ],
+      "name" : "matrix-rust-components-swift",
+      "purl" : "pkg:swift\/github.com\/matrix-org\/matrix-rust-components-swift@26.08.11",
+      "type" : "framework",
+      "version" : "26.08.11"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/gmessages"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/gmessages\/releases\/download\/v0.2605.0\/mautrix-gmessages-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "d45c1a5e4ce317f0288930f71ecb32375b1a755567469eaac581d17d6b1777b9"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-gmessages-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/gmessages@v0.2605.0",
+      "type" : "application",
+      "version" : "v0.2605.0"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/gvoice"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/gvoice\/releases\/download\/v0.2605.0\/mautrix-gvoice-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "a259d45000dd34c144a71b017d0a193bf13b414d1321d7f2113736cbae0df4da"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-gvoice-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/gvoice@v0.2605.0",
+      "type" : "application",
+      "version" : "v0.2605.0"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/meta"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/meta\/releases\/download\/v0.2607.0\/mautrix-instagram-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "c7bc6e81def6a23f0f2e8359d7079e86b82723dfb9082b22ad642a9a8912173b"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-instagram-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/meta@v0.2607.0",
+      "type" : "application",
+      "version" : "v0.2607.0"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/meta"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/meta\/releases\/download\/v0.2607.0\/mautrix-meta-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "a468cca261034f1a93efc927113ab3d07411836e7c5dd68b7c71e59bdfb17dfb"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-meta-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/meta@v0.2607.0",
+      "type" : "application",
+      "version" : "v0.2607.0"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/telegram"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/telegram\/releases\/download\/v0.2607.0\/mautrix-telegram-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "0e2c2ded1773533c691b902b3d0fc4ec87a2f5d3170cd714f7e9e3e494481dd3"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-telegram-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/telegram@v0.2607.0",
+      "type" : "application",
+      "version" : "v0.2607.0"
+    },
+    {
+      "description" : "Downloaded on demand and verified before it is made executable.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/mautrix\/whatsapp"
+        },
+        {
+          "type" : "distribution",
+          "url" : "https:\/\/github.com\/mautrix\/whatsapp\/releases\/download\/v0.2607.0\/mautrix-whatsapp-darwin-arm64"
+        }
+      ],
+      "hashes" : [
+        {
+          "alg" : "SHA-256",
+          "content" : "f5c0291e4315a8cf70e836b7707f4e6503353b021a115eebb3a6b18f1b9acfbc"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "mautrix-whatsapp-darwin-arm64",
+      "purl" : "pkg:github\/mautrix\/whatsapp@v0.2607.0",
+      "type" : "application",
+      "version" : "v0.2607.0"
+    },
+    {
+      "description" : "Bundled with locked Python dependencies, then copied to a private profile at first launch.",
+      "externalReferences" : [
+        {
+          "type" : "vcs",
+          "url" : "https:\/\/github.com\/element-hq\/synapse"
+        }
+      ],
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "synapse",
+      "purl" : "pkg:pypi\/matrix-synapse@1.158.0",
+      "type" : "application",
+      "version" : "1.158.0"
+    }
+  ],
+  "metadata" : {
+    "component" : {
+      "licenses" : [
+        {
+          "license" : {
+            "id" : "AGPL-3.0-or-later"
+          }
+        }
+      ],
+      "name" : "Inbox+",
+      "type" : "application",
+      "version" : "0.5.0"
+    },
+    "timestamp" : "1970-01-01T00:00:00Z"
+  },
+  "serialNumber" : "urn:uuid:1AF35FA5-3DD8-48BB-89A6-92E0B441FA1F",
+  "specVersion" : "1.5",
+  "version" : 1
+}

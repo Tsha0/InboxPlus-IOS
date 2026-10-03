@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    InboxPlus is not sandboxed. It supervises Synapse and bridge processes it downloads into a profile
+    directory, which the App Sandbox does not permit. Distribution is Developer ID, not the App
+    Store, so the hardened runtime plus notarization is the applicable protection.
+  -->
+
+  <!-- The bridges are Go binaries produced elsewhere; the runtime is a Python interpreter. Neither
+       carries InboxPlus's signature, so launching them requires this. It is the narrowest exception
+       that lets a supervised child run at all. -->
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <false/>
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+
+  <!-- iMessage is reached by sending Apple events to Messages. Nothing else is automated. -->
+  <key>com.apple.security.automation.apple-events</key>
+  <true/>
+
+  <!-- Deliberately absent: JIT, and getting an unsigned-memory exception. InboxPlus runs no
+       interpreted code of its own, so granting either would widen the attack surface for
+       nothing. -->
+</dict>
+</plist>
