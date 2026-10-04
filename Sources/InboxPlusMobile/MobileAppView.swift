@@ -166,23 +166,7 @@ private struct MobileHome: View {
             if let message = model.healthBannerMessage {
                 Label(message, systemImage: "wifi.exclamationmark").font(.caption).padding(10).frame(maxWidth: .infinity).background(.quaternary)
             }
-            TabView(selection: $tab) {
-                NavigationSplitView(preferredCompactColumn: $compactColumn) {
-                    InboxView(items: model.inboxItems, onSelect: { model.selectInboxItem($0); compactColumn = .detail })
-                        .navigationTitle("Inbox+").navigationBarTitleDisplayMode(.inline)
-                        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showPicker = true } label: { Image(systemName: "plus") }.accessibilityLabel("Add account") } }
-                } detail: { detail }
-                .tabItem { Label("Inbox", systemImage: "tray") }.tag(0)
-                NavigationStack {
-                    List(model.people) { person in
-                        NavigationLink {
-                            ContactSummaryView(personName: person.displayName, summaries: model.summaries(for: person.id), onOpen: { model.openConversation($0); tab = 0; compactColumn = .detail })
-                        } label: { Label(person.displayName, systemImage: "person.crop.circle") }
-                    }.overlay { if model.people.isEmpty { ContentUnavailableView("No linked people", systemImage: "person.2", description: Text("Open a conversation and choose Link to person to group their accounts.")) } }
-                        .navigationTitle("Contacts")
-                }.tabItem { Label("Contacts", systemImage: "person.2") }.tag(1)
-                NavigationStack { settings }.tabItem { Label("Settings", systemImage: "gearshape") }.tag(2)
-            }
+            tabs
         }
         .sheet(isPresented: $showPicker) {
             AccountPickerView(connectedPlatforms: model.platformsWithAccounts, onSelect: connect, onCancel: { showPicker = false })
@@ -202,6 +186,45 @@ private struct MobileHome: View {
         } message: { Text("The account remains connected on your Mac. Reconnecting this device can load its history again.") }
         .confirmationDialog("Disconnect this device?", isPresented: $showUnpair, titleVisibility: .visible) {
             Button("Disconnect and clear local data", role: .destructive) { session.unpair() }
+        }
+    }
+    @ViewBuilder private var tabs: some View {
+        if #available(iOS 26, *) {
+            modernTabs.tabBarMinimizeBehavior(.onScrollDown)
+        } else if #available(iOS 18, *) {
+            modernTabs
+        } else {
+            TabView(selection: $tab) {
+                inboxTab.tabItem { Label("Inbox", systemImage: "tray") }.tag(0)
+                contactsTab.tabItem { Label("Contacts", systemImage: "person.2") }.tag(1)
+                NavigationStack { settings }.tabItem { Label("Settings", systemImage: "gearshape") }.tag(2)
+            }
+        }
+    }
+    @available(iOS 18, *)
+    private var modernTabs: some View {
+        // Native tabs supply Liquid Glass, selection animations and accessibility on iOS 26.
+        TabView(selection: $tab) {
+            Tab("Inbox", systemImage: "tray", value: 0) { inboxTab }
+            Tab("Contacts", systemImage: "person.2", value: 1) { contactsTab }
+            Tab("Settings", systemImage: "gearshape", value: 2) { NavigationStack { settings } }
+        }
+    }
+    private var inboxTab: some View {
+        NavigationSplitView(preferredCompactColumn: $compactColumn) {
+            InboxView(items: model.inboxItems, onSelect: { model.selectInboxItem($0); compactColumn = .detail })
+                .navigationTitle("Inbox+").navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { showPicker = true } label: { Image(systemName: "plus") }.accessibilityLabel("Add account") } }
+        } detail: { detail }
+    }
+    private var contactsTab: some View {
+        NavigationStack {
+            List(model.people) { person in
+                NavigationLink {
+                    ContactSummaryView(personName: person.displayName, summaries: model.summaries(for: person.id), onOpen: { model.openConversation($0); tab = 0; compactColumn = .detail })
+                } label: { Label(person.displayName, systemImage: "person.crop.circle") }
+            }.overlay { if model.people.isEmpty { ContentUnavailableView("No linked people", systemImage: "person.2", description: Text("Open a conversation and choose Link to person to group their accounts.")) } }
+                .navigationTitle("Contacts")
         }
     }
     @ViewBuilder private var detail: some View {
