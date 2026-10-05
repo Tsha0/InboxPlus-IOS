@@ -15,3 +15,7 @@ xcuserdata/
 
 # The optional companion manifest pins its SDK exactly; the mobile package has no dependencies.
 /Package.resolved
+
+# Python helpers used by CI
+__pycache__/
+*.pyc

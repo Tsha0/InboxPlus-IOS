@@ -1,7 +1,32 @@
 // !$*UTF8*$!
 {archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+B9B3CDC0336D17F9C83FE33A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Support/UITestCase.swift"; sourceTree = "<group>";};
+CDFDF70264E900F4E953EBB8 = {isa = PBXBuildFile; fileRef = B9B3CDC0336D17F9C83FE33A;};
+084CF420B07D0FBC155D8207 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NavigationTests.swift"; sourceTree = "<group>";};
+3E11FB42018F3B67E8087A20 = {isa = PBXBuildFile; fileRef = 084CF420B07D0FBC155D8207;};
+BFC06E4E65C09E1F309C1648 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PairingTests.swift"; sourceTree = "<group>";};
+1D1388276F6E4B426EED29AF = {isa = PBXBuildFile; fileRef = BFC06E4E65C09E1F309C1648;};
+DBCE04582F5818FCB459C654 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessagingTests.swift"; sourceTree = "<group>";};
+EA7D45AB65D70712D59A43DC = {isa = PBXBuildFile; fileRef = DBCE04582F5818FCB459C654;};
+FFA73D82334595A7D96F92B7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContactsAndAccountsTests.swift"; sourceTree = "<group>";};
+0E31DC64B891ED44E5318795 = {isa = PBXBuildFile; fileRef = FFA73D82334595A7D96F92B7;};
+FB482499E195C1A11D53930F = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../../Tests/InboxPlusMobileTests/MobileSessionTests.swift"; sourceTree = "<group>";};
+BB55B6810847C0CF9A0CA8B2 = {isa = PBXBuildFile; fileRef = FB482499E195C1A11D53930F;};
+095DB5249C3079BC5EA2D994 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceStorageTests.swift"; sourceTree = "<group>";};
+40CC9EF297D3B160CB7A2C40 = {isa = PBXBuildFile; fileRef = 095DB5249C3079BC5EA2D994;};
+E44005FE93930F9D35A0D575 = {isa = PBXGroup; path = InboxPlusIOSTests; sourceTree = "<group>"; children = (FB482499E195C1A11D53930F,095DB5249C3079BC5EA2D994,);};
+7F47598CF8AF7DDD92A28426 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = InboxPlusIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR;};
+76CEE4623EBB4DCFF4072CD0 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (BB55B6810847C0CF9A0CA8B2,40CC9EF297D3B160CB7A2C40,); runOnlyForDeploymentPostprocessing = 0;};
+1A9D1E7CC39F251AA130CC31 = {isa = XCSwiftPackageProductDependency; package = 4FF15B936B8851E2CAA578B9; productName = InboxPlusMobile;};
+85F541F64250C12876E368BB = {isa = PBXBuildFile; productRef = 1A9D1E7CC39F251AA130CC31;};
+603B70F458287E73EE5E47C8 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (85F541F64250C12876E368BB,); runOnlyForDeploymentPostprocessing = 0;};
+C51670963503A5A9D9981772 = {isa = PBXTargetDependency; target = 7D1043473D55BFA90E8530D3; targetProxy = D799BAE6088A90139B415FCC;};
+CF9A7D636D1E273C1ED897B0 = {isa = XCBuildConfiguration; name = Debug; buildSettings = {IPHONEOS_DEPLOYMENT_TARGET = "17.0"; SDKROOT = iphoneos; SWIFT_VERSION = "6.0"; TARGETED_DEVICE_FAMILY = "1,2"; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = "com.inboxplus.ios.tests"; PRODUCT_NAME = "$(TARGET_NAME)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InboxPlusIOS.app/InboxPlusIOS"; BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic;};};
+A2E1D7F97E6FCFB464B64A46 = {isa = XCBuildConfiguration; name = Release; buildSettings = {IPHONEOS_DEPLOYMENT_TARGET = "17.0"; SDKROOT = iphoneos; SWIFT_VERSION = "6.0"; TARGETED_DEVICE_FAMILY = "1,2"; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = "com.inboxplus.ios.tests"; PRODUCT_NAME = "$(TARGET_NAME)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InboxPlusIOS.app/InboxPlusIOS"; BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic;};};
+AEEB71629BD858FCAB06938C = {isa = XCConfigurationList; buildConfigurations = (CF9A7D636D1E273C1ED897B0,A2E1D7F97E6FCFB464B64A46,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+3B31CD7C0A1E8DB1A654CC76 = {isa = PBXNativeTarget; name = InboxPlusIOSTests; productName = InboxPlusIOSTests; productReference = 7F47598CF8AF7DDD92A28426; productType = "com.apple.product-type.bundle.unit-test"; buildConfigurationList = AEEB71629BD858FCAB06938C; buildPhases = (76CEE4623EBB4DCFF4072CD0,603B70F458287E73EE5E47C8,); buildRules = (); dependencies = (C51670963503A5A9D9981772,); packageProductDependencies = (1A9D1E7CC39F251AA130CC31,);};
+
 BE7E1D0445B8638E9F94D853 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxPlusIOSApp.swift; sourceTree = "<group>";};
-E05FCB614AB36FDEE72EE1F2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxPlusIOSUITests.swift; sourceTree = "<group>";};
 3685E330EC5277A9DD5661C6 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>";};
 F6C433ACAC2A27CC06A06258 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = InboxPlusIOS.app; sourceTree = BUILT_PRODUCTS_DIR;};
 91251B722F603F5400AD371C = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = InboxPlusIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR;};
@@ -9,12 +34,11 @@ F6C433ACAC2A27CC06A06258 = {isa = PBXFileReference; explicitFileType = wrapper.a
 9D062BAFFF17BA8B9A1215C4 = {isa = XCSwiftPackageProductDependency; package = 4FF15B936B8851E2CAA578B9; productName = InboxPlusMobile;};
 E03EB618E90D617AB8F6A5B0 = {isa = PBXBuildFile; productRef = 9D062BAFFF17BA8B9A1215C4;};
 501ECD4A6B537A966B6A8D67 = {isa = PBXBuildFile; fileRef = BE7E1D0445B8638E9F94D853;};
-80FAC02A0BD5812E2A00F339 = {isa = PBXBuildFile; fileRef = E05FCB614AB36FDEE72EE1F2;};
 CF8A4D27E1C506A7C75A76BE = {isa = PBXBuildFile; fileRef = 3685E330EC5277A9DD5661C6;};
 3A2A88DEEFF3D1D23E496597 = {isa = PBXGroup; path = InboxPlusIOS; sourceTree = "<group>"; children = (BE7E1D0445B8638E9F94D853,3685E330EC5277A9DD5661C6,);};
-8B7A6DECC0651D269EA794C7 = {isa = PBXGroup; path = InboxPlusIOSUITests; sourceTree = "<group>"; children = (E05FCB614AB36FDEE72EE1F2,);};
-FBDC4F23F93125BBEEAE800C = {isa = PBXGroup; name = Products; sourceTree = "<group>"; children = (F6C433ACAC2A27CC06A06258,91251B722F603F5400AD371C,);};
-B28B7AF69320201D1CF206EB = {isa = PBXGroup; sourceTree = "<group>"; children = (3A2A88DEEFF3D1D23E496597,8B7A6DECC0651D269EA794C7,FBDC4F23F93125BBEEAE800C,);};
+8B7A6DECC0651D269EA794C7 = {isa = PBXGroup; path = InboxPlusIOSUITests; sourceTree = "<group>"; children = (B9B3CDC0336D17F9C83FE33A,084CF420B07D0FBC155D8207,BFC06E4E65C09E1F309C1648,DBCE04582F5818FCB459C654,FFA73D82334595A7D96F92B7,);};
+FBDC4F23F93125BBEEAE800C = {isa = PBXGroup; name = Products; sourceTree = "<group>"; children = (F6C433ACAC2A27CC06A06258,91251B722F603F5400AD371C,7F47598CF8AF7DDD92A28426,);};
+B28B7AF69320201D1CF206EB = {isa = PBXGroup; sourceTree = "<group>"; children = (E44005FE93930F9D35A0D575,3A2A88DEEFF3D1D23E496597,8B7A6DECC0651D269EA794C7,FBDC4F23F93125BBEEAE800C,);};
 E9B2E96ABC5F6856F2BE79CF = {isa = XCBuildConfiguration; name = Debug; buildSettings = {ONLY_ACTIVE_ARCH = YES;IPHONEOS_DEPLOYMENT_TARGET = "17.0";SDKROOT = "iphoneos";SWIFT_VERSION = "6.0";TARGETED_DEVICE_FAMILY = "1,2";CLANG_ENABLE_MODULES = "YES";CODE_SIGN_STYLE = "Automatic";GENERATE_INFOPLIST_FILE = "YES";PRODUCT_BUNDLE_IDENTIFIER = "com.inboxplus.ios";PRODUCT_NAME = "$(TARGET_NAME)";INFOPLIST_FILE = "InboxPlusIOS/Info.plist";ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";MARKETING_VERSION = "0.1.0";CURRENT_PROJECT_VERSION = "1";INFOPLIST_KEY_UILaunchScreen_Generation = "YES";INFOPLIST_KEY_UIApplicationSceneManifest_Generation = "YES";INFOPLIST_KEY_CFBundleDisplayName = "Inbox+";SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";SWIFT_OPTIMIZATION_LEVEL = "-Onone";};};
 5A8C91857F674E16E2724F47 = {isa = XCBuildConfiguration; name = Release; buildSettings = {IPHONEOS_DEPLOYMENT_TARGET = "17.0";SDKROOT = "iphoneos";SWIFT_VERSION = "6.0";TARGETED_DEVICE_FAMILY = "1,2";CLANG_ENABLE_MODULES = "YES";CODE_SIGN_STYLE = "Automatic";GENERATE_INFOPLIST_FILE = "YES";PRODUCT_BUNDLE_IDENTIFIER = "com.inboxplus.ios";PRODUCT_NAME = "$(TARGET_NAME)";INFOPLIST_FILE = "InboxPlusIOS/Info.plist";ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";MARKETING_VERSION = "0.1.0";CURRENT_PROJECT_VERSION = "1";INFOPLIST_KEY_UILaunchScreen_Generation = "YES";INFOPLIST_KEY_UIApplicationSceneManifest_Generation = "YES";INFOPLIST_KEY_CFBundleDisplayName = "Inbox+";SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";SWIFT_OPTIMIZATION_LEVEL = "-O";};};
 F37922C48DA5978D02C9E50E = {isa = XCConfigurationList; buildConfigurations = (E9B2E96ABC5F6856F2BE79CF,5A8C91857F674E16E2724F47,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
@@ -30,8 +54,8 @@ F27FEDE2220BCD326AEE3E86 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 CEF439E78636CDAB99CD2923 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (E03EB618E90D617AB8F6A5B0,); runOnlyForDeploymentPostprocessing = 0;};
 DEE1EBCD105D3D47ADF43ABA = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (CF8A4D27E1C506A7C75A76BE,); runOnlyForDeploymentPostprocessing = 0;};
 7D1043473D55BFA90E8530D3 = {isa = PBXNativeTarget; name = InboxPlusIOS; productName = InboxPlusIOS; productReference = F6C433ACAC2A27CC06A06258; productType = "com.apple.product-type.application"; buildConfigurationList = F37922C48DA5978D02C9E50E; buildPhases = (F27FEDE2220BCD326AEE3E86,CEF439E78636CDAB99CD2923,DEE1EBCD105D3D47ADF43ABA,); buildRules = (); dependencies = (); packageProductDependencies = (9D062BAFFF17BA8B9A1215C4,);};
-7CB9C5DBBDFFE89694C24C30 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (80FAC02A0BD5812E2A00F339,); runOnlyForDeploymentPostprocessing = 0;};
+7CB9C5DBBDFFE89694C24C30 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (CDFDF70264E900F4E953EBB8,3E11FB42018F3B67E8087A20,1D1388276F6E4B426EED29AF,EA7D45AB65D70712D59A43DC,0E31DC64B891ED44E5318795,); runOnlyForDeploymentPostprocessing = 0;};
 FE5A98EB24D93616679DF2C5 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0;};
 A94A8FE5CCB19BA61C4C0873 = {isa = PBXNativeTarget; name = InboxPlusIOSUITests; productName = InboxPlusIOSUITests; productReference = 91251B722F603F5400AD371C; productType = "com.apple.product-type.bundle.ui-testing"; buildConfigurationList = BECB265224D91761C05FDA33; buildPhases = (7CB9C5DBBDFFE89694C24C30,FE5A98EB24D93616679DF2C5,); buildRules = (); dependencies = (E9FAD0C6CD43534327C0AF90,);};
-98F54143AB4E86B28C3AFEE0 = {isa = PBXProject; attributes = { LastUpgradeCheck = 2650; }; buildConfigurationList = 862894B703A6DEDF96A9DD6C; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; knownRegions = (en,Base); mainGroup = B28B7AF69320201D1CF206EB; productRefGroup = FBDC4F23F93125BBEEAE800C; projectDirPath = ""; projectRoot = ""; targets = (7D1043473D55BFA90E8530D3,A94A8FE5CCB19BA61C4C0873,); packageReferences = (4FF15B936B8851E2CAA578B9,);};
+98F54143AB4E86B28C3AFEE0 = {isa = PBXProject; attributes = { LastUpgradeCheck = 2650; }; buildConfigurationList = 862894B703A6DEDF96A9DD6C; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; knownRegions = (en,Base); mainGroup = B28B7AF69320201D1CF206EB; productRefGroup = FBDC4F23F93125BBEEAE800C; projectDirPath = ""; projectRoot = ""; targets = (7D1043473D55BFA90E8530D3,A94A8FE5CCB19BA61C4C0873,3B31CD7C0A1E8DB1A654CC76,); packageReferences = (4FF15B936B8851E2CAA578B9,);};
 }; rootObject = 98F54143AB4E86B28C3AFEE0;}

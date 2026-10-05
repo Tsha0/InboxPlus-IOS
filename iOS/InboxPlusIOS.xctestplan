@@ -1,0 +1,47 @@
+{
+  "configurations": [
+    {
+      "id": "f05e852e-1390-4ab5-a829-4808453304b0",
+      "name": "Default",
+      "options": {}
+    }
+  ],
+  "defaultOptions": {
+    "codeCoverage": true,
+    "environmentVariableEntries": [
+      {
+        "key": "INBOXPLUS_TEST_TOKEN",
+        "value": "$(INBOXPLUS_TEST_TOKEN)"
+      },
+      {
+        "key": "INBOXPLUS_TEST_LARGE_TEXT",
+        "value": "$(INBOXPLUS_TEST_LARGE_TEXT)"
+      }
+    ],
+    "testTimeoutsEnabled": true,
+    "maximumTestExecutionTimeAllowance": 120,
+    "targetForVariableExpansion": {
+      "containerPath": "container:InboxPlusIOS.xcodeproj",
+      "identifier": "7D1043473D55BFA90E8530D3",
+      "name": "InboxPlusIOS"
+    }
+  },
+  "testTargets": [
+    {
+      "target": {
+        "containerPath": "container:InboxPlusIOS.xcodeproj",
+        "identifier": "3B31CD7C0A1E8DB1A654CC76",
+        "name": "InboxPlusIOSTests"
+      }
+    },
+    {
+      "target": {
+        "containerPath": "container:InboxPlusIOS.xcodeproj",
+        "identifier": "A94A8FE5CCB19BA61C4C0873",
+        "name": "InboxPlusIOSUITests"
+      },
+      "parallelizable": false
+    }
+  ],
+  "version": 1
+}

@@ -1,6 +1,5 @@
 #if os(iOS)
 import SwiftUI
-import Security
 import InboxPlusCore
 import InboxPlusUI
 import InboxPlusFeatures
@@ -8,92 +7,12 @@ import InboxPlusGateway
 import InboxPlusRemote
 import InboxPlusBridge
 
-@MainActor @Observable
-final class MobileSession {
-    var model: InboxPlusAppModel?
-    var client: CompanionClient?
-    var gateway: CompanionGateway?
-    var isDemo = false
-    var error: String?
-    var isConnecting = false
-    private let directoryURL = URL.applicationSupportDirectory.appendingPathComponent("contacts.json")
-    init() {
-        if ProcessInfo.processInfo.arguments.contains("--demo") { demo(); return }
-        if let config = try? PairingKeychain.load() { Task { await connect(config, save: false) } }
-    }
-    func connect(_ config: CompanionConfiguration, save: Bool = true) async {
-        guard !isConnecting else { return }
-        isConnecting = true
-        defer { isConnecting = false }
-        do {
-            let client = CompanionClient(configuration: config)
-            let cacheURL = URL.cachesDirectory.appendingPathComponent("InboxPlusMedia")
-            let loader = MediaLoader(cache: try MediaCache(directory: cacheURL), fetcher: CompanionMediaFetcher(client: client), freeSpace: VolumeFreeSpaceReporter(url: cacheURL))
-            let directory = (try? Data(contentsOf: directoryURL)).flatMap { try? JSONDecoder().decode(SavedDirectory.self, from: $0).directory } ?? ContactDirectory()
-            let gateway = CompanionGateway(client: client)
-            let next = InboxPlusAppModel(gateway: gateway, directory: directory, media: MediaController(loader: loader))
-            try await next.start()
-            if save { try PairingKeychain.save(config) }
-            model?.stop()
-            self.client = client; self.gateway = gateway; model = next; isDemo = false; error = nil
-        } catch { self.error = error.localizedDescription }
-    }
-    func demo() {
-        model?.stop(); client = nil; gateway = nil; isDemo = true; error = nil
-        model = InboxPlusAppModel(gateway: InMemoryMessagingGateway(seed: Fixtures.demoSnapshot), directory: Fixtures.directory)
-        Task { try? await model?.start() }
-    }
-    func saveContacts() {
-        guard !isDemo, let model else { return }
-        do {
-            try FileManager.default.createDirectory(at: directoryURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try JSONEncoder().encode(SavedDirectory(model.contactDirectory)).write(to: directoryURL, options: [.atomic, .completeFileProtection])
-        } catch { self.error = "Could not save contacts: \(error.localizedDescription)" }
-    }
-    func pauseAccount(_ account: ConnectedAccount, paused: Bool) {
-        if paused { model?.disconnect(accountID: account.id) } else { model?.reconnect(accountID: account.id) }
-        Task { await gateway?.setPaused(paused, accountID: account.id) }
-    }
-    func unpair() {
-        model?.stop(); model = nil; client = nil; gateway = nil; isDemo = false
-        PairingKeychain.delete()
-        try? FileManager.default.removeItem(at: directoryURL)
-        try? FileManager.default.removeItem(at: URL.cachesDirectory.appendingPathComponent("InboxPlusMedia"))
-    }
-}
-private struct SavedDirectory: Codable {
-    let people: [String: InboxPlusPerson]
-    let links: [String: PersonLink]
-    init(_ directory: ContactDirectory) { people = directory.people; links = directory.links }
-    var directory: ContactDirectory? { try? ContactDirectory(people: people, links: links) }
-}
-@MainActor private enum PairingKeychain {
-    static let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: "com.inboxplus.ios.pairing", kSecAttrAccount as String: "companion"]
-    static func save(_ configuration: CompanionConfiguration) throws {
-        let data = try JSONEncoder().encode(configuration)
-        let update = SecItemUpdate(query as CFDictionary, [kSecValueData: data] as CFDictionary)
-        if update == errSecSuccess { return }
-        guard update == errSecItemNotFound else { throw CompanionError.server("Could not update the pairing key (\(update)).") }
-        var item = query
-        item[kSecValueData as String] = data
-        item[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        let status = SecItemAdd(item as CFDictionary, nil)
-        guard status == errSecSuccess else { throw CompanionError.server("Could not store the pairing key (\(status)).") }
-    }
-    static func load() throws -> CompanionConfiguration? {
-        var item = query; item[kSecReturnData as String] = true; item[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        guard SecItemCopyMatching(item as CFDictionary, &result) == errSecSuccess, let data = result as? Data else { return nil }
-        let saved = try JSONDecoder().decode(CompanionConfiguration.self, from: data)
-        return try CompanionConfiguration(address: saved.address.absoluteString, token: saved.token)
-    }
-    static func delete() { SecItemDelete(query as CFDictionary) }
-}
-
 public struct MobileAppView: View {
-    @State private var session = MobileSession()
+    @State private var session: MobileSession
     @Environment(\.scenePhase) private var scenePhase
-    public init() {}
+    public init() {
+        _session = State(initialValue: MobileSession.applicationSession())
+    }
     public var body: some View {
         Group {
             if let model = session.model {
@@ -103,9 +22,9 @@ public struct MobileAppView: View {
         .tint(.primary)
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
-                Task { do { try await session.model?.start() } catch { session.model?.reportStartupFailure(error) } }
+                Task { await session.resume() }
             } else if phase == .background {
-                session.saveContacts(); session.model?.stop()
+                session.suspend()
             }
         }
     }

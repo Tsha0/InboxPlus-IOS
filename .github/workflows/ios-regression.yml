@@ -1,0 +1,74 @@
+name: iOS regression
+on:
+  schedule:
+    - cron: '40 19 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ios-regression-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    name: Regression (${{ matrix.name }})
+    runs-on: macos-26
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: iPhone-dark
+            family: iPhone
+            runtime: '26.4.1'
+            appearance: dark
+            large_text: '0'
+          - name: iPad-large-text
+            family: iPad
+            runtime: '26.4.1'
+            appearance: light
+            large_text: '1'
+          - name: iOS-17-compatibility
+            family: iPhone
+            runtime: '17.5'
+            device: iPhone 15
+            appearance: light
+            large_text: '0'
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install compatibility runtime
+        if: matrix.runtime == '17.5'
+        run: xcodebuild -downloadPlatform iOS -buildVersion 17.5
+      - name: Select exact simulator
+        env:
+          RUNTIME: ${{ matrix.runtime }}
+          FAMILY: ${{ matrix.family }}
+          DEVICE: ${{ matrix.device }}
+        run: |
+          args=(--runtime "$RUNTIME" --family "$FAMILY")
+          if [[ -n "$DEVICE" ]]; then args+=(--name "$DEVICE"); fi
+          echo "INBOXPLUS_SIMULATOR_ID=$(python3 Scripts/ci/select-simulator.py "${args[@]}")" >> "$GITHUB_ENV"
+      - name: Run regression suite
+        env:
+          INBOXPLUS_REPORT_NAME: ${{ matrix.name }}
+          INBOXPLUS_TEST_APPEARANCE: ${{ matrix.appearance }}
+          INBOXPLUS_TEST_LARGE_TEXT: ${{ matrix.large_text }}
+        run: bash Scripts/ci/test-ios.sh
+      - name: Export reports
+        if: always()
+        run: bash Scripts/ci/export-test-results.sh
+      - name: Save regression artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: regression-${{ matrix.name }}
+          path: |
+            build/*.xcresult
+            build/*.log
+            build/*-summary.json
+            build/*-coverage.json
+            build/screenshots/
+          retention-days: 14
