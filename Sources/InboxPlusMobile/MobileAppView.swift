@@ -66,14 +66,19 @@ private struct PairingView: View {
     }
 }
 
+private struct MobileLoginPresentation: Identifiable {
+    let id = UUID()
+    let controller: BridgeLoginController
+}
+
 private struct MobileHome: View {
     @Bindable var session: MobileSession
     @Bindable var model: InboxPlusAppModel
     @State private var tab = 0
     @State private var compactColumn: NavigationSplitViewColumn = .sidebar
     @State private var showPicker = false
-    @State private var login: BridgeLoginController?
-    @State private var showLogin = false
+    @State private var login: MobileLoginPresentation?
+    @State private var pendingLogin: MobileLoginPresentation?
     @State private var notice: String?
     @State private var pendingRemoval: ConnectedAccount?
     @State private var showUnpair = false
@@ -87,16 +92,16 @@ private struct MobileHome: View {
             }
             tabs
         }
-        .sheet(isPresented: $showPicker) {
+        .sheet(isPresented: $showPicker, onDismiss: {
+            login = pendingLogin; pendingLogin = nil
+        }) {
             AccountPickerView(connectedPlatforms: model.platformsWithAccounts, onSelect: connect, onCancel: { showPicker = false })
         }
-        .sheet(isPresented: $showLogin) {
-            if let login {
-                LoginStepView(controller: login, onFinished: { _ in
-                    showLogin = false
-                    if let config = session.client?.configuration { Task { await session.connect(config) } }
-                }, onCancel: { showLogin = false })
-            }
+        .sheet(item: $login) { presentation in
+            LoginStepView(controller: presentation.controller, onFinished: { _ in
+                login = nil
+                if let config = session.client?.configuration { Task { await session.connect(config) } }
+            }, onCancel: { login = nil })
         }
         .alert("Inbox+", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) { Button("OK") { notice = nil } } message: { Text(notice ?? "") }
         .onChange(of: model.detailSelection) { session.saveContacts() }
@@ -193,8 +198,7 @@ private struct MobileHome: View {
         showPicker = false
         guard let client = session.client else { notice = "Connect to your Mac to add real accounts. Demo mode uses sample conversations."; return }
         guard platform != .iMessage else { notice = "Enable iMessage on your Mac by granting Inbox+ Companion Full Disk Access and Messages Automation permission, then restart the companion."; return }
-        login = BridgeLoginController(platform: platform, session: CompanionLoginSession(client: client, platform: platform))
-        Task { try? await Task.sleep(for: .milliseconds(350)); showLogin = true }
+        pendingLogin = MobileLoginPresentation(controller: BridgeLoginController(platform: platform, session: CompanionLoginSession(client: client, platform: platform)))
     }
 }
 #endif
