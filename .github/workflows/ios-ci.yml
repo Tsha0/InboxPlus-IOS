@@ -20,8 +20,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Validate pipeline gates
-        run: python3 Scripts/ci/test-pipeline.py
+      - name: Validate workflows and pipeline gates
+        run: bash Scripts/ci/check-workflows.sh
       - name: Run shared, mobile, and transport tests
         run: |
           mkdir -p build

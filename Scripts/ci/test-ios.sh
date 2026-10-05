@@ -8,7 +8,13 @@ FIXTURE_TOKEN="$(openssl rand -hex 32)"
 swift build --product InboxPlusCompanionFixture
 INBOXPLUS_PAIRING_KEY="$FIXTURE_TOKEN" .build/debug/InboxPlusCompanionFixture > build/fixture.log 2>&1 &
 FIXTURE_PID=$!
-trap 'kill "$FIXTURE_PID" 2>/dev/null || true' EXIT
+cleanup() {
+  STATUS=$?
+  kill "$FIXTURE_PID" 2>/dev/null || true
+  if [[ "$STATUS" != 0 && -f "build/$REPORT_NAME.log" ]]; then tail -n 100 "build/$REPORT_NAME.log"; fi
+  return "$STATUS"
+}
+trap cleanup EXIT
 # Confirm both readiness and authentication without printing the generated key.
 FIXTURE_TEST_KEY="$FIXTURE_TOKEN" python3 - <<'PY'
 import json, os, time, urllib.request
@@ -30,5 +36,5 @@ xcodebuild -project iOS/InboxPlusIOS.xcodeproj -scheme InboxPlusIOS \
   -testPlan InboxPlusIOS -destination "platform=iOS Simulator,id=$INBOXPLUS_SIMULATOR_ID" \
   -derivedDataPath build/DerivedData -resultBundlePath "build/$REPORT_NAME.xcresult" \
   -parallel-testing-enabled NO -enableCodeCoverage YES \
-  CODE_SIGNING_ALLOWED=NO "INBOXPLUS_TEST_TOKEN=$FIXTURE_TOKEN" \
+  CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- "INBOXPLUS_TEST_TOKEN=$FIXTURE_TOKEN" \
   "INBOXPLUS_TEST_LARGE_TEXT=${INBOXPLUS_TEST_LARGE_TEXT:-0}" test > "build/$REPORT_NAME.log" 2>&1

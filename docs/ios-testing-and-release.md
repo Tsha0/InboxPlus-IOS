@@ -25,7 +25,7 @@ bash Scripts/ci/test-ios.sh
 bash Scripts/ci/export-test-results.sh
 ```
 
-The helper starts the fixture with a random key, confirms readiness, passes the key to the test plan, and stops the fixture on exit. Port 8765 must be available. `INBOXPLUS_TEST_APPEARANCE=dark` and `INBOXPLUS_TEST_LARGE_TEXT=1` select regression presentation. The simulator runtime must be installed; selection fails instead of silently choosing another version.
+The helper starts the fixture with a random key, confirms readiness, passes the key to the test plan, and stops the fixture on exit. Simulator builds use ad hoc signing so real Keychain entitlements are present; no Apple signing credentials are needed. Port 8765 must be available. `INBOXPLUS_TEST_APPEARANCE=dark` and `INBOXPLUS_TEST_LARGE_TEXT=1` select regression presentation. The simulator runtime must be installed; selection fails instead of silently choosing another version.
 
 For Xcode's Test button, first start `InboxPlusCompanionFixture` with `INBOXPLUS_PAIRING_KEY` and pass that same value as the `INBOXPLUS_TEST_TOKEN` build setting. The script handles this automatically. Tests never use real network-account credentials.
 

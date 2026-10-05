@@ -89,6 +89,15 @@ final class MobileSessionTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: rig.storage.directoryURL.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: rig.storage.mediaDirectory.path))
     }
+    @MainActor func testCredentialDeletionFailureStillClearsLocalFiles() async throws {
+        let rig = try SessionRig(); defer { rig.clean() }
+        let session = rig.session(); await session.connect(rig.config)
+        rig.credentials.failDelete = true
+        session.unpair()
+        XCTAssertNil(session.model); XCTAssertNotNil(session.error)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: rig.storage.directoryURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: rig.storage.mediaDirectory.path))
+    }
     @MainActor func testCorruptContactsAreReportedWithoutOverwritingData() async throws {
         let rig = try SessionRig(); defer { rig.clean() }
         let corrupt = Data("not-json".utf8); try corrupt.write(to: rig.storage.directoryURL)
@@ -102,12 +111,16 @@ final class MobileSessionTests: XCTestCase {
     var value: CompanionConfiguration?
     var saves = 0
     var failSave = false
+    var failDelete = false
     func load() throws -> CompanionConfiguration? { value }
     func save(_ configuration: CompanionConfiguration) throws {
         if failSave { throw CompanionError.server("Test credential failure") }
         saves += 1; value = configuration
     }
-    func delete() throws { value = nil }
+    func delete() throws {
+        if failDelete { throw CompanionError.server("Test credential deletion failure") }
+        value = nil
+    }
 }
 @MainActor private struct SessionRig {
     let root: URL

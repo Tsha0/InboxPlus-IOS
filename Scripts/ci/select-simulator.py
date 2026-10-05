@@ -3,7 +3,7 @@
 import argparse, json, subprocess
 
 def select_runtime(runtimes, version):
-    return next((r["identifier"] for r in runtimes if r.get("version") == version and r.get("isAvailable")), None)
+    return next((r["identifier"] for r in runtimes if r.get("version") == version and r.get("isAvailable") and r.get("identifier", "").startswith("com.apple.CoreSimulator.SimRuntime.iOS-")), None)
 
 def select_device(devices, runtime, family, name=None):
     candidates = [d for d in devices.get(runtime, []) if d.get("isAvailable") and family in d["name"]]

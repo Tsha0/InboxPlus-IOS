@@ -79,8 +79,10 @@ final class MobileSession {
     func unpair() {
         generation = UUID(); isConnecting = false
         model?.stop(); model = nil; client = nil; gateway = nil; isDemo = false; error = nil
-        do { try credentials.delete(); try storage.clear() }
-        catch { self.error = "Could not clear local data: \(error.localizedDescription)" }
+        var failures: [String] = []
+        do { try credentials.delete() } catch { failures.append(error.localizedDescription) }
+        do { try storage.clear() } catch { failures.append(error.localizedDescription) }
+        if !failures.isEmpty { error = "Could not clear local data: " + failures.joined(separator: "; ") }
     }
 }
 
