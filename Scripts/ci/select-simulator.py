@@ -2,6 +2,9 @@
 """Select an exact installed runtime and create a requested device if necessary."""
 import argparse, json, subprocess
 
+def select_runtime(runtimes, version):
+    return next((r["identifier"] for r in runtimes if r.get("version") == version and r.get("isAvailable")), None)
+
 def select_device(devices, runtime, family, name=None):
     candidates = [d for d in devices.get(runtime, []) if d.get("isAvailable") and family in d["name"]]
     if name:
@@ -14,9 +17,9 @@ def main():
     parser.add_argument("--family", choices=["iPhone", "iPad"], required=True)
     parser.add_argument("--name")
     args = parser.parse_args()
-    runtime = "com.apple.CoreSimulator.SimRuntime.iOS-" + args.runtime.replace(".", "-")
     runtimes = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "runtimes", "--json"]))["runtimes"]
-    if not any(r["identifier"] == runtime and r.get("isAvailable") for r in runtimes):
+    runtime = select_runtime(runtimes, args.runtime)
+    if runtime is None:
         raise SystemExit(f"Required iOS {args.runtime} runtime is not installed; refusing to silently use another version.")
     devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "--json"]))["devices"]
     device = select_device(devices, runtime, args.family, args.name)

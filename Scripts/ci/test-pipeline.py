@@ -13,6 +13,11 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(selection.select_device(devices,'ios17','iPhone'),'old')
         self.assertIsNone(selection.select_device(devices,'missing','iPhone'))
         self.assertIsNone(selection.select_device(devices,'ios26','iPhone','iPhone SE'))
+    def test_runtime_patch_version_does_not_assume_identifier_format(self):
+        selection=module('select-simulator')
+        runtimes=[{'version':'26.4.1','identifier':'com.apple.CoreSimulator.SimRuntime.iOS-26-4','isAvailable':True}]
+        self.assertEqual(selection.select_runtime(runtimes,'26.4.1'),'com.apple.CoreSimulator.SimRuntime.iOS-26-4')
+        self.assertIsNone(selection.select_runtime(runtimes,'26.5'))
     def test_release_requires_exact_green_main_push(self):
         release=module('verify-release')
         run={'head_sha':'abc','event':'push','head_branch':'main','status':'completed','conclusion':'success'}

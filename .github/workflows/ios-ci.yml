@@ -48,7 +48,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Select exact simulator
-        run: echo "INBOXPLUS_SIMULATOR_ID=$(python3 Scripts/ci/select-simulator.py --runtime 26.4.1 --family '${{ matrix.family }}')" >> "$GITHUB_ENV"
+        run: |
+          DEVICE_ID="$(python3 Scripts/ci/select-simulator.py --runtime 26.4.1 --family '${{ matrix.family }}')"
+          [[ -n "$DEVICE_ID" ]]
+          echo "INBOXPLUS_SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Native unit and UI tests against fixture companion
         env:
           INBOXPLUS_REPORT_NAME: ${{ matrix.family }}

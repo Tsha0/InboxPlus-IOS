@@ -50,7 +50,9 @@ jobs:
         run: |
           args=(--runtime "$RUNTIME" --family "$FAMILY")
           if [[ -n "$DEVICE" ]]; then args+=(--name "$DEVICE"); fi
-          echo "INBOXPLUS_SIMULATOR_ID=$(python3 Scripts/ci/select-simulator.py "${args[@]}")" >> "$GITHUB_ENV"
+          DEVICE_ID="$(python3 Scripts/ci/select-simulator.py "${args[@]}")"
+          [[ -n "$DEVICE_ID" ]]
+          echo "INBOXPLUS_SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Run regression suite
         env:
           INBOXPLUS_REPORT_NAME: ${{ matrix.name }}
