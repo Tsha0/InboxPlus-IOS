@@ -47,7 +47,8 @@ private struct PairingView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         TextField("Mac HTTPS address", text: $address).keyboardType(.URL).textContentType(.URL).accessibilityIdentifier("pairing-address")
                         Divider()
-                        SecureField("Pairing key", text: $token).accessibilityIdentifier("pairing-key")
+                        // Pairing uses a generated security code, not a website password.
+                        SecureField("Pairing key", text: $token).textContentType(.oneTimeCode).accessibilityIdentifier("pairing-key")
                     }.textInputAutocapitalization(.never).autocorrectionDisabled().padding(18).background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 16))
                     if let error = session.error { Text(error).font(.callout).foregroundStyle(.red).accessibilityIdentifier("pairing-error") }
                     Button {
