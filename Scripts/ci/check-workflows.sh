@@ -17,5 +17,5 @@ assert hashlib.sha256(pathlib.Path(os.environ['ARCHIVE']).read_bytes()).hexdiges
 PY
 tar -xzf "$ARCHIVE" -C "$LINT_TEMP" actionlint
 "$LINT_TEMP/actionlint" -shellcheck= -pyflakes= .github/workflows/*.yml
-bash -n Scripts/ci/*.sh
+for SCRIPT in Scripts/ci/*.sh; do bash -n "$SCRIPT"; done
 python3 Scripts/ci/test-pipeline.py
