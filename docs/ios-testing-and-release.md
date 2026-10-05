@@ -13,7 +13,7 @@ The mobile and companion pipelines run independently. Pull requests must pass **
 | Other `Tests/` suites | Existing shared behavior and Mac runtime/bridge/iMessage/Matrix coverage. Real-account tests remain explicitly opt-in. |
 | `Scripts/ci/test-pipeline.py` | Exact-runtime selection, exact-commit release gating, version validation and missing signing settings. |
 
-Native iOS tests are selected by `iOS/InboxPlusIOS.xctestplan`. UI tests run serially on each simulator so they cannot reset another test's local state. A debug-only `--ui-testing` launch flag isolates credentials and files; this flag has no effect in Release builds. The real companion never includes the fixture's fault operations.
+Native iOS tests are selected by `iOS/InboxPlusIOS.xctestplan`. UI tests run serially on each simulator so they cannot reset another test's local state. Each test has a five-minute execution cap for hosted-runner startup and credential UI; individual UI assertions keep their shorter timeouts. A debug-only `--ui-testing` launch flag isolates credentials and files; this flag has no effect in Release builds. The real companion never includes the fixture's fault operations.
 
 ## Run locally
 
