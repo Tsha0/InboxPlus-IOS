@@ -14,13 +14,18 @@ final class ContactsAndAccountsTests: InboxPlusUITestCase {
     }
     @MainActor func testAccountPickerAndFixtureLogin() async throws {
         let app = launch(demo: false); try await pairWithFixture(app)
-        selectTab("Settings", app: app); app.buttons["add-account"].tap()
+        selectTab("Settings", app: app)
+        let addAccount = app.buttons["add-account"]
+        for _ in 0..<8 where !addAccount.isHittable { app.swipeUp() }
+        XCTAssertTrue(addAccount.waitForExistence(timeout: 5)); addAccount.tap()
         XCTAssertTrue(app.staticTexts["Add an account"].waitForExistence(timeout: 5))
-        app.buttons["picker-discord"].tap()
+        XCTAssertFalse(app.buttons["picker-discord"].isEnabled)
+        let network = app.buttons["picker-facebookMessenger"]
+        XCTAssertTrue(network.isEnabled); network.tap()
         let username = app.textFields["login-field-username"]
         XCTAssertTrue(username.waitForExistence(timeout: 10)); username.tap(); username.typeText("fixture-user")
         app.buttons["login-continue"].tap()
-        XCTAssertTrue(app.staticTexts["Discord is connected"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Facebook Messenger is connected"].waitForExistence(timeout: 10))
         record(app, name: "fixture-login")
     }
 }

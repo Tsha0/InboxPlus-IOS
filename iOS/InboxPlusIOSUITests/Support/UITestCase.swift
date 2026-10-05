@@ -37,6 +37,9 @@ class InboxPlusUITestCase: XCTestCase {
         app.secureTextFields["pairing-key"].tap(); app.secureTextFields["pairing-key"].typeText(token)
         app.buttons["pairing-connect"].tap()
         XCTAssertTrue(app.textFields["inbox-search"].waitForExistence(timeout: 15))
+        // iPhone presents this as a sheet and iPad as an alert; both expose the button.
+        let skipPasswordSave = app.buttons["Not Now"]
+        if skipPasswordSave.waitForExistence(timeout: 3) { skipPasswordSave.tap() }
         XCTAssertFalse(app.staticTexts["DEMO · Sample conversations"].exists)
     }
 }
