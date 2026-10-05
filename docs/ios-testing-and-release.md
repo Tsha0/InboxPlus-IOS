@@ -13,7 +13,7 @@ The mobile and companion pipelines run independently. Pull requests must pass **
 | Other `Tests/` suites | Existing shared behavior and Mac runtime/bridge/iMessage/Matrix coverage. Real-account tests remain explicitly opt-in. |
 | `Scripts/ci/test-pipeline.py` | Exact-runtime selection, exact-commit release gating, version validation and missing signing settings. |
 
-Native iOS tests are selected by `iOS/InboxPlusIOS.xctestplan`. UI tests run serially on each simulator so they cannot reset another test's local state. A debug-only `--ui-testing` launch flag isolates credentials and files; this flag has no effect in Release builds. The real companion never includes the fixture's fault operations.
+Native iOS tests are selected by `iOS/InboxPlusIOS.xctestplan`. UI tests run serially on each simulator so they cannot reset another test's local state. Each test has a five-minute execution cap for hosted-runner startup and credential UI; individual UI assertions keep their shorter timeouts. A debug-only `--ui-testing` launch flag isolates credentials and files; this flag has no effect in Release builds. The real companion never includes the fixture's fault operations.
 
 ## Run locally
 
@@ -38,7 +38,7 @@ For Xcode's Test button, first start `InboxPlusCompanionFixture` with `INBOXPLUS
 | `ios-regression.yml` | Nightly, manual | Dark iPhone, large-text iPad, and iOS 17.5 compatibility reports/screenshots. |
 | `ios-release.yml` | `ios-vX.Y.Z` tag or manual | Unsigned validation archive and exact source/CI evidence; signed archive, IPA, symbols and upload logs when publishing. |
 
-Nightly runs are scheduled around 03:20/03:40 Singapore time. The compatibility job downloads iOS 17.5 explicitly. Pull-request jobs use installed iOS 26.4.1 simulators and pinned Xcode 26.5. Official GitHub Actions are pinned to immutable commit IDs. Jobs have timeouts; newer PR runs cancel obsolete ones. Reports are retained for 14 days, release evidence for 30 days.
+Nightly runs are scheduled around 03:20/03:40 Singapore time. The compatibility job initializes CoreSimulator before downloading iOS 17.5 explicitly, avoiding the hosted runner’s first-connection race. Pull-request jobs use installed iOS 26.4.1 simulators and pinned Xcode 26.5. Official GitHub Actions are pinned to immutable commit IDs. Jobs have timeouts; newer PR runs cancel obsolete ones. Reports are retained for 14 days, release evidence for 30 days.
 
 Coverage is recorded as a baseline, not inflated by tests that mirror implementation. No arbitrary percentage gate is claimed. The required gates enforce passing tests and a successful Release build. Real-account certification and background push delivery are outside these fixtures.
 

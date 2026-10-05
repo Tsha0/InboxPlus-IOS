@@ -19,7 +19,7 @@
       }
     ],
     "testTimeoutsEnabled": true,
-    "maximumTestExecutionTimeAllowance": 120,
+    "maximumTestExecutionTimeAllowance": 300,
     "targetForVariableExpansion": {
       "containerPath": "container:InboxPlusIOS.xcodeproj",
       "identifier": "7D1043473D55BFA90E8530D3",

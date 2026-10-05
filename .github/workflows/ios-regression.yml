@@ -41,7 +41,11 @@ jobs:
           persist-credentials: false
       - name: Install compatibility runtime
         if: matrix.runtime == '17.5'
-        run: xcodebuild -downloadPlatform iOS -buildVersion 17.5
+        run: |
+          # Initialize CoreSimulator before Xcode's download client connects to it.
+          # https://github.com/actions/runner-images/issues/12758
+          xcrun simctl list > /dev/null
+          xcodebuild -downloadPlatform iOS -buildVersion 17.5
       - name: Select exact simulator
         env:
           RUNTIME: ${{ matrix.runtime }}
