@@ -46,11 +46,13 @@ class InboxPlusUITestCase: XCTestCase {
         XCTAssertTrue(app.textFields["inbox-search"].waitForExistence(timeout: 15))
         // iPhone presents this as a sheet and iPad as an alert; both expose the button.
         let skipPasswordSave = app.buttons["Not Now"]
-        if skipPasswordSave.waitForExistence(timeout: 3) {
+        // CredentialUI can appear several seconds after the inbox is first visible
+        // on hosted simulators. Wait for its real accessibility state, not a delay.
+        if skipPasswordSave.waitForExistence(timeout: 15) {
             // The remote password UI can animate independently from the app's idle state.
             for _ in 0..<3 {
                 guard skipPasswordSave.exists else { break }
-                XCTAssertTrue(waitFor(skipPasswordSave, predicate: "hittable == true", timeout: 5))
+                XCTAssertTrue(waitFor(skipPasswordSave, predicate: "hittable == true", timeout: 10))
                 skipPasswordSave.tap()
                 if waitFor(skipPasswordSave, predicate: "exists == false", timeout: 2) { break }
             }
