@@ -12,7 +12,14 @@ class InboxPlusUITestCase: XCTestCase {
     }
     @MainActor func selectTab(_ title: String, app: XCUIApplication) {
         let tab = app.buttons[title].firstMatch
-        XCTAssertTrue(tab.waitForExistence(timeout: 5)); tab.tap()
+        XCTAssertTrue(tab.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitFor(tab, predicate: "hittable == true", timeout: 5))
+        tab.tap()
+        XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5))
+    }
+    @MainActor private func waitFor(_ element: XCUIElement, predicate: String, timeout: TimeInterval) -> Bool {
+        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: predicate), object: element)
+        return XCTWaiter.wait(for: [expectation], timeout: timeout) == .completed
     }
     @MainActor func openFamily(_ app: XCUIApplication) {
         let row = app.buttons.matching(NSPredicate(format: "identifier CONTAINS %@", "family-telegram")).firstMatch
@@ -39,7 +46,16 @@ class InboxPlusUITestCase: XCTestCase {
         XCTAssertTrue(app.textFields["inbox-search"].waitForExistence(timeout: 15))
         // iPhone presents this as a sheet and iPad as an alert; both expose the button.
         let skipPasswordSave = app.buttons["Not Now"]
-        if skipPasswordSave.waitForExistence(timeout: 3) { skipPasswordSave.tap() }
+        if skipPasswordSave.waitForExistence(timeout: 3) {
+            // The remote password UI can animate independently from the app's idle state.
+            for _ in 0..<3 {
+                guard skipPasswordSave.exists else { break }
+                XCTAssertTrue(waitFor(skipPasswordSave, predicate: "hittable == true", timeout: 5))
+                skipPasswordSave.tap()
+                if waitFor(skipPasswordSave, predicate: "exists == false", timeout: 2) { break }
+            }
+            XCTAssertFalse(skipPasswordSave.exists, "Dismiss password saving before navigating the app")
+        }
         XCTAssertFalse(app.staticTexts["DEMO · Sample conversations"].exists)
     }
 }
