@@ -82,13 +82,16 @@ public struct CompanionClient: Sendable {
 
 public actor CompanionGateway: MessagingGateway {
     private let client: CompanionClient
+    private let sleep: @Sendable () async throws -> Void
     private var polling: Task<Void, Never>?
     private var subscriptionID: UUID?
     private var pausedAccounts: Set<String> = []
     private var continuation: AsyncStream<GatewayEvent>.Continuation?
     private var accountIDs: [String] = []
     private var previous: MessagingSnapshot?
-    public init(client: CompanionClient) { self.client = client }
+    public init(client: CompanionClient, sleep: @escaping @Sendable () async throws -> Void = { try await Task.sleep(for: .seconds(3)) }) {
+        self.client = client; self.sleep = sleep
+    }
     deinit { polling?.cancel() }
     public func loadSnapshot() async throws -> MessagingSnapshot {
         guard let snapshot = try await client.call(CompanionRequest("snapshot")).snapshot else { throw CompanionError.invalidResponse }
@@ -103,9 +106,10 @@ public actor CompanionGateway: MessagingGateway {
         let (stream, continuation) = AsyncStream<GatewayEvent>.makeStream()
         self.continuation = continuation
         continuation.onTermination = { [weak self] _ in Task { await self?.stop(id: id) } }
+        let sleep = self.sleep
         polling = Task { [weak self] in
             while !Task.isCancelled {
-                do { try await Task.sleep(for: .seconds(3)) } catch { break }
+                do { try await sleep() } catch { break }
                 guard let self else { break }
                 await self.poll(subscription: id)
             }
@@ -142,6 +146,7 @@ public actor CompanionGateway: MessagingGateway {
             previous = delivered
             accountIDs = snapshot.accounts.map(\.id)
         } catch {
+            if let subscription, subscription != subscriptionID { return }
             for id in accountIDs { continuation?.yield(.connectionChanged(accountID: id, isConnected: false)) }
         }
     }
@@ -157,7 +162,11 @@ public actor CompanionGateway: MessagingGateway {
         guard attachment.byteCount <= 25 * 1024 * 1024 else { throw CompanionError.server("Choose a file smaller than 25 MB.") }
         var request = CompanionRequest("sendAttachment")
         request.route = route; request.filename = attachment.filename
-        request.data = try Data(contentsOf: attachment.fileURL)
+        let actualSize = try attachment.fileURL.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        guard actualSize <= 25 * 1024 * 1024 else { throw CompanionError.server("Choose a file smaller than 25 MB.") }
+        let data = try Data(contentsOf: attachment.fileURL, options: .mappedIfSafe)
+        guard data.count <= 25 * 1024 * 1024 else { throw CompanionError.server("Choose a file smaller than 25 MB.") }
+        request.data = data
         guard let receipt = try await client.call(request).receipt else { throw CompanionError.invalidResponse }
         await poll()
         return receipt

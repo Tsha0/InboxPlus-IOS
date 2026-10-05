@@ -1,0 +1,105 @@
+name: iOS CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ios-ci-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
+jobs:
+  shared:
+    name: Shared and mobile unit tests
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate workflows and pipeline gates
+        run: bash Scripts/ci/check-workflows.sh
+      - name: Run shared, mobile, and transport tests
+        run: |
+          mkdir -p build
+          swift test --enable-code-coverage > build/shared-tests.log 2>&1
+      - name: Save shared reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: shared-test-reports
+          path: |
+            build/shared-tests.log
+            .build/**/codecov/*.json
+          retention-days: 14
+  simulators:
+    name: iOS tests (${{ matrix.family }})
+    runs-on: macos-26
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [iPhone, iPad]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select exact simulator
+        run: |
+          DEVICE_ID="$(python3 Scripts/ci/select-simulator.py --runtime 26.4.1 --family '${{ matrix.family }}')"
+          [[ -n "$DEVICE_ID" ]]
+          echo "INBOXPLUS_SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+      - name: Native unit and UI tests against fixture companion
+        env:
+          INBOXPLUS_REPORT_NAME: ${{ matrix.family }}
+        run: bash Scripts/ci/test-ios.sh
+      - name: Export screenshots and coverage
+        if: always()
+        run: bash Scripts/ci/export-test-results.sh
+      - name: Save simulator reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-${{ matrix.family }}-reports
+          path: |
+            build/*.xcresult
+            build/*.log
+            build/*-summary.json
+            build/*-coverage.json
+            build/screenshots/
+          retention-days: 14
+  release-build:
+    name: Unsigned iOS Release build
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build device Release configuration
+        run: |
+          mkdir -p build
+          xcodebuild -project iOS/InboxPlusIOS.xcodeproj -scheme InboxPlusIOS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build > build/release-build.log 2>&1
+      - name: Save build log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-release-build-log
+          path: build/release-build.log
+  gate:
+    name: iOS gate
+    if: always()
+    needs: [shared, simulators, release-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every iOS job to pass
+        env:
+          SHARED: ${{ needs.shared.result }}
+          SIMULATORS: ${{ needs.simulators.result }}
+          RELEASE: ${{ needs.release-build.result }}
+        run: |
+          [[ "$SHARED" == success && "$SIMULATORS" == success && "$RELEASE" == success ]]
+          echo 'Shared tests, both simulator suites, and the Release build passed.' >> "$GITHUB_STEP_SUMMARY"

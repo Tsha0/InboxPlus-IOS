@@ -35,13 +35,14 @@ You can also run `Scripts/run-ios.sh --demo` to build, install, and launch in th
 For a physical device, select your own development team under Signing & Capabilities and choose the device. No signing identity or provisioning profile is stored here.
 
 ```bash
-swift test
-xcodebuild -project iOS/InboxPlusIOS.xcodeproj -scheme InboxPlusIOS \
-  -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO test
+swift test --enable-code-coverage
+export INBOXPLUS_SIMULATOR_ID="$(python3 Scripts/ci/select-simulator.py --runtime 26.4.1 --family iPhone)"
+bash Scripts/ci/test-ios.sh
 ```
 
-Use an installed simulator name from `xcrun simctl list devices available`. The shared scheme includes UI tests for search, conversation navigation, sending, contacts, account picker, and pairing validation. GitHub Actions runs both iPhone and iPad tests and retains `.xcresult` reports.
+The shared test plan includes native mobile unit tests and focused UI suites. The helper starts an isolated fixture companion for real pairing, messaging retry, and account-login tests. GitHub Actions runs independent mobile and companion checks, iPhone/iPad UI tests, nightly presentation/compatibility regression, and a separate release pipeline.
+
+See [iOS testing and release](docs/ios-testing-and-release.md) for local commands, reports, required CI gates, and the Apple signing settings needed to upload to TestFlight.
 
 ## Run the real Mac companion
 
@@ -70,7 +71,7 @@ export INBOXPLUS_PAIRING_KEY="$(openssl rand -hex 32)"
 swift run InboxPlusCompanionFixture
 ```
 
-Pair the local simulator with `http://127.0.0.1:8765` and that key. This executable is explicitly a demo fixture and supports snapshots and text sending only. Production uses `InboxPlusCompanion`.
+Pair the local simulator with `http://127.0.0.1:8765` and that key. This executable is explicitly a demo fixture and supports snapshots, text/attachment sending, media, and a controlled login flow. The `fixture-fail-once:` text prefix deliberately fails its first send so retry can be tested. Production uses `InboxPlusCompanion`.
 
 ## Source layout
 

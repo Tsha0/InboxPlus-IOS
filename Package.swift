@@ -113,6 +113,7 @@ package = Package(
         .target(name: "InboxPlusCompanionServer", dependencies: ["InboxPlusRemote"]),
         .executableTarget(name: "InboxPlusCompanionFixture", dependencies: ["InboxPlusCompanionServer", "InboxPlusRemote", "InboxPlusFeatures"]),
         .testTarget(name: "InboxPlusRemoteTests", dependencies: ["InboxPlusRemote", "InboxPlusFeatures", "InboxPlusCompanionServer"]),
+        .testTarget(name: "InboxPlusMobileTests", dependencies: ["InboxPlusMobile", "InboxPlusFeatures", "InboxPlusGateway", "InboxPlusRemote"]),
         .testTarget(name: "InboxPlusUITests", dependencies: ["InboxPlusCore", "InboxPlusFeatures", "InboxPlusUI", "InboxPlusBridge"]),
     ]
 )

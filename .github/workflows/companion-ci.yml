@@ -1,0 +1,36 @@
+name: Companion CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 19 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: companion-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    name: Companion gate
+    runs-on: macos-26
+    timeout-minutes: 25
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.5.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Full Mac companion tests and build
+        run: |
+          mkdir -p build
+          INBOXPLUS_BUILD_COMPANION=1 swift test --scratch-path .build-companion > build/companion-tests.log 2>&1
+          INBOXPLUS_BUILD_COMPANION=1 swift build --scratch-path .build-companion --product InboxPlusCompanion >> build/companion-tests.log 2>&1
+      - name: Save companion test report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: companion-test-report
+          path: build/companion-tests.log
+          retention-days: 14
