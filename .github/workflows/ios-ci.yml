@@ -26,6 +26,9 @@ jobs:
         run: |
           mkdir -p build
           swift test --enable-code-coverage > build/shared-tests.log 2>&1
+      - name: Show failure summary
+        if: failure()
+        run: bash Scripts/ci/print-failure.sh build/shared-tests.log
       - name: Save shared reports
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -56,6 +59,9 @@ jobs:
         env:
           INBOXPLUS_REPORT_NAME: ${{ matrix.family }}
         run: bash Scripts/ci/test-ios.sh
+      - name: Show failure summary
+        if: failure()
+        run: bash Scripts/ci/print-failure.sh build/*.log
       - name: Export screenshots and coverage
         if: always()
         run: bash Scripts/ci/export-test-results.sh
@@ -83,6 +89,9 @@ jobs:
         run: |
           mkdir -p build
           xcodebuild -project iOS/InboxPlusIOS.xcodeproj -scheme InboxPlusIOS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build > build/release-build.log 2>&1
+      - name: Show failure summary
+        if: failure()
+        run: bash Scripts/ci/print-failure.sh build/release-build.log
       - name: Save build log
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

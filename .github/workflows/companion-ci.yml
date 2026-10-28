@@ -27,6 +27,9 @@ jobs:
           mkdir -p build
           INBOXPLUS_BUILD_COMPANION=1 swift test --scratch-path .build-companion > build/companion-tests.log 2>&1
           INBOXPLUS_BUILD_COMPANION=1 swift build --scratch-path .build-companion --product InboxPlusCompanion >> build/companion-tests.log 2>&1
+      - name: Show failure summary
+        if: failure()
+        run: bash Scripts/ci/print-failure.sh build/companion-tests.log
       - name: Save companion test report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

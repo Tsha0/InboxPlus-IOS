@@ -1,0 +1,43 @@
+name: Bug
+description: Something in Inbox+ for iPhone or iPad, or its Mac companion, does not work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Pairing and connecting to the Mac
+        - Inbox and conversations
+        - Sending and attachments
+        - Contacts and linked people
+        - Adding an account or network
+        - iPad layout
+        - Accessibility, dark mode or large text
+        - Mac companion
+        - Something else
+  - type: input
+    id: device
+    attributes:
+      label: Device and iOS version
+      placeholder: iPhone 16, iOS 26.1
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: The TestFlight build, or the commit you built from.

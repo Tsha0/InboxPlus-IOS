@@ -63,6 +63,9 @@ jobs:
           INBOXPLUS_TEST_APPEARANCE: ${{ matrix.appearance }}
           INBOXPLUS_TEST_LARGE_TEXT: ${{ matrix.large_text }}
         run: bash Scripts/ci/test-ios.sh
+      - name: Show failure summary
+        if: failure()
+        run: bash Scripts/ci/print-failure.sh build/*.log
       - name: Export reports
         if: always()
         run: bash Scripts/ci/export-test-results.sh

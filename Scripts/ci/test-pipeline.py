@@ -29,6 +29,15 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(release.validate_version('0.2.0'),'0.2.0')
         for value in ['v0.2.0','0.2','01.2.0','$(id)','0.2.0;echo secret']:
             with self.assertRaises(ValueError):release.validate_version(value)
+    def test_failure_summary_shows_failures_beyond_the_log_tail(self):
+        import subprocess, tempfile
+        with tempfile.TemporaryDirectory() as folder:
+            log=pathlib.Path(folder)/'tests.log'
+            log.write_text('\n'.join(['ok']*500+['✘ Test pairingRetries() recorded an issue at MobileSessionTests.swift:42']+['done']*100)+'\n')
+            script=pathlib.Path(__file__).with_name('print-failure.sh')
+            output=subprocess.run(['bash',str(script),str(log),str(pathlib.Path(folder)/'missing.log')],capture_output=True,text=True,check=True).stdout
+        self.assertIn('MobileSessionTests.swift:42',output)
+        self.assertIn('No log at',output)
     def test_missing_signing_settings_are_reported_by_name(self):
         preflight=module('release-preflight')
         self.assertEqual(preflight.missing_settings({}),preflight.REQUIRED)

@@ -1,0 +1,27 @@
+name: Improvement idea
+description: A feature, a UX change, or anything else that would make Inbox+ better.
+labels: [proposal]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Agents build an idea only after the owner approves it by adding the `agent:ready` label.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: Who runs into it, and when.
+    validations:
+      required: true
+  - type: textarea
+    id: better
+    attributes:
+      label: What would be better
+      description: What you would like to happen instead. Sketches and examples help.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Optional. How you would check that it works.
